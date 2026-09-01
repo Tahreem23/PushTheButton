@@ -1,0 +1,62 @@
+/* ============================================================
+   CelebrationBurst — tasteful yellow accents on success.
+   A small ring + a handful of dots. One breath, no chaos.
+   ============================================================ */
+
+.celebration-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.celebration-burst__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--button-size);
+  height: var(--button-size);
+  border: 3px solid var(--color-accent-yellow);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: burst-ring 620ms var(--ease-press) both;
+}
+
+.celebration-burst__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--button-size) * 0.075);
+  height: calc(var(--button-size) * 0.075);
+  border-radius: 50%;
+  background: var(--color-accent-yellow);
+  animation: burst-dot 620ms var(--ease-press) both;
+}
+
+.celebration-burst__dot:nth-child(2n) {
+  background: var(--color-accent-yellow-deep);
+  border-radius: 3px; /* a couple of confetti-ish squares */
+}
+
+@keyframes burst-ring {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.9);
+  }
+}
+
+@keyframes burst-dot {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--angle))
+      translateX(calc(var(--button-size) * 0.35)) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle))
+      translateX(var(--dist)) scale(0.4);
+  }
+}

@@ -1,0 +1,28 @@
+/* ============================================================
+   LevelHeader — top bar: level indicator + settings
+   Deliberately quiet: communicates progression without
+   dominating the screen.
+   ============================================================ */
+
+.level-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(14px, 2.5vmin, 22px) clamp(16px, 3vmin, 28px);
+}
+
+.level-header__spacer {
+  width: 40px; /* matches SettingsButton footprint so the label stays centered */
+}
+
+.level-header__label {
+  font-size: var(--level-label-size);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.level-header__label .level-header__number {
+  color: var(--color-ink-soft);
+}

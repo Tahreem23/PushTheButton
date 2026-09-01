@@ -1,0 +1,42 @@
+/* ============================================================
+   Base — global resets & screen shell
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  overflow: hidden; /* game screens don't scroll */
+  user-select: none;
+}
+
+#app {
+  height: 100%;
+}
+
+/* The screen shell: header row pinned to top, play area fills the rest. */
+.screen {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+button {
+  font-family: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}

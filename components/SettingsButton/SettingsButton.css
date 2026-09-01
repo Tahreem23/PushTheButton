@@ -1,0 +1,33 @@
+/* ============================================================
+   SettingsButton — small gear in the top corner.
+   Quiet by default, gently active on hover.
+   ============================================================ */
+
+.settings-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--color-ink-soft);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms var(--ease-bounce);
+}
+
+.settings-button:hover {
+  background: var(--color-ink-faint);
+  color: var(--color-ink);
+  transform: rotate(35deg);
+}
+
+.settings-button:active {
+  transform: rotate(35deg) scale(0.9);
+}
+
+.settings-button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}

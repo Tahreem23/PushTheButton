@@ -1,0 +1,99 @@
+/* ============================================================
+   Level 1 — screen composition & success sequence.
+   Component styles live with their components; this file only
+   owns how Level 1 arranges them and reacts to success.
+   ============================================================ */
+
+/* Bubble above the button, speech-distance away from the dome */
+.level1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--button-size) * 0.42);
+}
+
+/* Fixed slot so the bubble leaving doesn't shift the button */
+.level1__bubble-slot {
+  height: clamp(2.6rem, 7vmin, 3.2rem);
+  display: grid;
+  place-items: center;
+}
+
+.level1__button-slot {
+  position: relative; /* anchors the celebration burst to the button */
+}
+
+.level1__button-slot .celebration-burst {
+  inset: 0;
+}
+
+/* The bubble gets excited when the cursor reaches for the button */
+.level1:has(.push-button:hover) .speech-bubble {
+  animation: bubble-excited 380ms ease-in-out infinite;
+}
+
+@keyframes bubble-excited {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(-0.2em) rotate(-2deg); }
+  60%      { transform: translateY(-0.2em) rotate(2deg); }
+}
+
+/* Bubble transitions (bows out on success, pops back after reset) */
+.bubble-pop-enter-active,
+.bubble-pop-leave-active {
+  transition: opacity 240ms ease, transform 300ms var(--ease-bounce);
+}
+.bubble-pop-enter-from,
+.bubble-pop-leave-to {
+  opacity: 0;
+  transform: translateY(0.6em) scale(0.75);
+}
+
+/* ---- Very subtle screen feedback on press --------------------------- */
+
+.screen-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 60% at 50% 55%,
+    rgba(255, 194, 75, 0.10),
+    rgba(255, 194, 75, 0) 70%
+  );
+  opacity: 0;
+}
+
+.screen-flash.is-active {
+  animation: screen-flash 260ms ease-out both;
+}
+
+@keyframes screen-flash {
+  0%   { opacity: 0; }
+  25%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Play area gives the tiniest appreciative nod */
+.screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+@keyframes stage-nod {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+
+/* ---- Transition toward the next level (mockup stub) ----------------- */
+/* A soft warm sweep; in the real game the router takes over here. */
+
+.screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+@keyframes stage-leave {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}

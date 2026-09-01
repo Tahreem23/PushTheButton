@@ -1,0 +1,242 @@
+/* ============================================================
+   PushButton — the premium toy button.
+
+   Structure (bottom → top):
+     __floor    soft shadow on the surface
+     __base     cream/white plastic base plate
+     __cap      (idle/hop animation layer)
+       ├─ __side   red cylinder wall (physical depth)
+       └─ __top    glossy red dome (the part you touch)
+
+   Pressing slides the dome down over the cylinder wall,
+   squashing slightly. Releasing pops it back with overshoot.
+   ============================================================ */
+
+.push-button {
+  --s: var(--button-size);
+  --travel: calc(var(--s) * 0.15); /* how far the dome sinks when pressed */
+
+  position: relative;
+  width: calc(var(--s) * 1.2);
+  height: calc(var(--s) * 1.42);
+  cursor: pointer;
+
+  touch-action: manipulation;
+  -webkit-user-select: none;
+}
+
+/* All pieces are absolutely positioned, centered horizontally */
+.push-button span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* ---- Floor shadow -------------------------------------------------- */
+
+.push-button__floor {
+  bottom: 0;
+  width: 112%;
+  height: calc(var(--s) * 0.30);
+  border-radius: 50%;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(51, 40, 30, 0.32),
+    rgba(51, 40, 30, 0) 70%
+  );
+  filter: blur(2px);
+  transition:
+    transform 200ms ease,
+    opacity 200ms ease,
+    filter 200ms ease;
+}
+
+/* ---- Cream base plate ---------------------------------------------- */
+
+.push-button__base {
+  bottom: calc(var(--s) * 0.06);
+  width: 100%;
+  height: calc(var(--s) * 0.42);
+  border-radius: 50%;
+
+  background:
+    /* inner groove where the cylinder sits */
+    radial-gradient(
+      50% 55% at 50% 42%,
+      #e8e2d6 0 48%,
+      transparent 52%
+    ),
+    /* plastic side shading */
+    linear-gradient(
+      to bottom,
+      #efe9de 0%,
+      var(--color-base) 18%,
+      var(--color-base) 60%,
+      var(--color-base-shadow) 100%
+    );
+
+  box-shadow:
+    /* soft shelf shadow under the rim */
+    0 calc(var(--s) * 0.03) calc(var(--s) * 0.06) rgba(51, 40, 30, 0.18);
+}
+
+/* ---- Red cap (cylinder + dome) -------------------------------------- */
+
+.push-button__cap {
+  bottom: calc(var(--s) * 0.17);
+  width: calc(var(--s) * 0.92);
+  height: calc(var(--s) * 1.05);
+  transform: translateX(-50%) !important; /* anchor; inner pieces move */
+
+  /* Shy little hop every few seconds: "hey… over here…" */
+  animation: cap-plead 3.8s ease-in-out infinite;
+  filter: drop-shadow(0 -2px 0 transparent);
+}
+
+.push-button:not(.is-pressed):not(.is-success):hover .push-button__cap {
+  animation-play-state: paused;
+}
+
+@keyframes cap-plead {
+  0%, 100% { transform: translateX(-50%) translateY(0) ; }
+  3%       { transform: translateX(-50%) translateY(calc(var(--s) * -0.035)); }
+  6%       { transform: translateX(-50%) translateY(0); }
+  9%       { transform: translateX(-50%) translateY(calc(var(--s) * -0.02)); }
+  12%      { transform: translateX(-50%) translateY(0); }
+}
+
+/* Cylinder wall — the darker red band that gives the button body.
+   The dome slides DOWN over this when pressed. */
+.push-button__side {
+  bottom: 0;
+  width: 100%;
+  height: calc(var(--s) * 0.52);
+  border-radius: calc(var(--s) * 0.46);
+
+  background: linear-gradient(
+    to right,
+    var(--color-red-deep) 0%,
+    var(--color-red-dark) 18%,
+    #cf3223 50%,
+    var(--color-red-dark) 82%,
+    var(--color-red-deep) 100%
+  );
+}
+
+/* Glossy red dome — the touchable surface */
+.push-button__top {
+  bottom: calc(var(--s) * 0.22);
+  width: 100%;
+  height: calc(var(--s) * 0.70);
+  border-radius: 50%;
+
+  background: radial-gradient(
+    120% 130% at 32% 18%,
+    var(--color-red-light) 0%,
+    var(--color-red) 42%,
+    #d63628 70%,
+    var(--color-red-dark) 100%
+  );
+
+  box-shadow:
+    /* inner depth: dark at bottom rim, sheen at top */
+    inset 0 calc(var(--s) * -0.07) calc(var(--s) * 0.10)
+      rgba(120, 12, 4, 0.45),
+    inset 0 calc(var(--s) * 0.05) calc(var(--s) * 0.09)
+      rgba(255, 255, 255, 0.30);
+
+  transition: transform var(--dur-press) var(--ease-press);
+}
+
+/* Specular highlight — the glossy streak */
+.push-button__top::before {
+  content: "";
+  position: absolute;
+  top: 12%;
+  left: 16%;
+  width: 42%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: rotate(-18deg);
+}
+
+/* ============================================================
+   States
+   ============================================================ */
+
+/* Hover — subtle anticipation: dome lifts a breath, shadow follows */
+.push-button:not(.is-pressed):not(.is-success):hover .push-button__top {
+  transform:
+    translateX(-50%)
+    translateY(calc(var(--travel) * -0.25))
+    scale(1.02);
+}
+
+.push-button:not(.is-pressed):not(.is-success):hover .push-button__floor {
+  filter: blur(3px);
+}
+
+/* Pressed — dome sinks over the wall, squashes, shadow tightens */
+.push-button.is-pressed .push-button__top {
+  transform:
+    translateX(-50%)
+    translateY(var(--travel))
+    scaleX(1.06)
+    scaleY(0.94);
+}
+
+.push-button.is-pressed .push-button__floor {
+  transform: translateX(-50%) scale(0.92);
+  opacity: 0.85;
+  filter: blur(1px);
+}
+
+/* Success — pop back up with a happy little overshoot */
+.push-button.is-success .push-button__top {
+  transition: none;
+  animation: cap-pop 480ms var(--ease-bounce) both;
+}
+
+@keyframes cap-pop {
+  0% {
+    transform: translateX(-50%) translateY(var(--travel)) scaleX(1.06) scaleY(0.94);
+  }
+  45% {
+    transform: translateX(-50%) translateY(calc(var(--travel) * -0.55))
+      scaleX(0.97) scaleY(1.05);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.push-button.is-success .push-button__floor {
+  transition: none;
+  animation: floor-pop 480ms var(--ease-bounce) both;
+}
+
+@keyframes floor-pop {
+  0%   { transform: translateX(-50%) scale(0.92); filter: blur(1px); }
+  45%  { transform: translateX(-50%) scale(1.06); filter: blur(3px); }
+  100% { transform: translateX(-50%) scale(1); filter: blur(2px); }
+}
+
+/* ============================================================
+   Accessibility
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .push-button__cap {
+    animation: none;
+  }
+  .push-button.is-success .push-button__top,
+  .push-button.is-success .push-button__floor {
+    animation-duration: 1ms;
+  }
+}

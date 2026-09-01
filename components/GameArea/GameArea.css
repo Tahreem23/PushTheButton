@@ -1,0 +1,27 @@
+/* ============================================================
+   GameArea — the canonical play space.
+   Every level renders inside this box. The boundary is kept
+   intentionally subtle but stable, so future levels (chases,
+   dodging, hiding) inherit the same physical stage.
+   ============================================================ */
+
+.game-area {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+}
+
+.game-area__stage {
+  position: relative;
+  width: min(100%, var(--game-area-max-width));
+  /* Fills available height but keeps a landscape-ish stage feel */
+  height: min(100%, var(--game-area-max-height));
+
+  border: 2px dashed var(--color-boundary);
+  border-radius: var(--game-area-radius);
+
+  /* Content inside the stage is centered by default */
+  display: grid;
+  place-items: center;
+}

@@ -1,0 +1,57 @@
+/* ============================================================
+   SpeechBubble — the button's first hint of personality.
+   Personality lives in the words + the bounce, not in a face.
+   ============================================================ */
+
+.speech-bubble {
+  position: relative;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 800;
+  font-size: clamp(1rem, 2.6vmin, 1.25rem);
+  padding: 0.55em 1.1em;
+  border-radius: 1.2em;
+  box-shadow:
+    0 8px 18px -8px rgba(51, 40, 30, 0.25),
+    0 2px 4px -1px rgba(51, 40, 30, 0.12);
+
+  /* Gentle, cheeky bob — inviting, not hyperactive */
+  animation: bubble-bob 2.6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Tail pointing down toward the button */
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.42em;
+  width: 0.8em;
+  height: 0.8em;
+  background: var(--color-surface);
+  border-bottom-right-radius: 0.25em;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Pops in when it appears */
+.speech-bubble--enter {
+  animation:
+    bubble-pop-in 420ms var(--ease-bounce) both,
+    bubble-bob 2.6s ease-in-out 420ms infinite;
+}
+
+@keyframes bubble-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-0.35em); }
+}
+
+@keyframes bubble-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
