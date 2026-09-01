@@ -1,11 +1,12 @@
 /* ============================================================
    LevelComplete — success panel shown after a level solves.
-   Emits: next (proceed), replay (reset this level fresh).
+   Emits: next (proceed), replay (reset this level fresh),
+          home (back to the front door).
    ============================================================ */
 
 const LevelComplete = {
   name: "LevelComplete",
-  emits: ["next", "replay"],
+  emits: ["next", "replay", "home"],
 
   props: {
     level: { type: Number, required: true },
@@ -22,6 +23,9 @@ const LevelComplete = {
         </button>
         <button type="button" class="level-complete__replay" @click="$emit('replay')">
           Replay level {{ level }}
+        </button>
+        <button type="button" class="level-complete__home" @click="$emit('home')">
+          Go to home
         </button>
       </div>
     </div>

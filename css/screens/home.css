@@ -72,6 +72,66 @@
   color: var(--color-ink);
 }
 
+/* ---- Level pills ------------------------------------------------------
+   Quiet, below the invitation: unlocked levels are replayable,
+   locked ones just sit there waiting. */
+
+.home__levels {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--button-size) * 1.16 + 2.4rem);
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 0.6rem;
+
+  animation: home-text-in 500ms ease-out 550ms both;
+}
+
+.home__level {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--color-ink);
+
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink-faint);
+
+  transition:
+    transform 160ms var(--ease-bounce),
+    border-color 160ms ease;
+}
+
+.home__level:hover:not(.is-locked),
+.home__level:focus-visible:not(.is-locked) {
+  border-color: var(--color-ink-soft);
+  transform: translateY(-2px);
+}
+
+.home__level:active:not(.is-locked) {
+  transform: translateY(0) scale(0.94);
+}
+
+/* Finished levels wear a little gold. */
+.home__level.is-done {
+  background: var(--color-accent-yellow);
+  border-color: var(--color-accent-yellow-deep);
+}
+
+/* Locked: quiet, closed, no teasing hover. */
+.home__level.is-locked {
+  background: transparent;
+  color: var(--color-ink-faint);
+  border-style: dashed;
+  cursor: default;
+}
+
 /* ---- Entrance -------------------------------------------------------
    The title/invite are translateX(-50%)-centered, so their entrance
    keyframes carry the X-centering along. */
@@ -101,7 +161,8 @@
 @media (prefers-reduced-motion: reduce) {
   .home__button-slot,
   .home__title,
-  .home__invite {
+  .home__invite,
+  .home__levels {
     animation-duration: 1ms;
     animation-delay: 0ms;
   }

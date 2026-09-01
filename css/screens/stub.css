@@ -2,7 +2,7 @@
    Stub screen — placeholder for levels that don't exist yet.
    ============================================================ */
 
-.level2-stub__main {
+.level-stub__main {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,13 +10,13 @@
   gap: 1.5rem;
 }
 
-.level2-stub__text {
+.level-stub__text {
   font-size: clamp(1.1rem, 3.2vmin, 1.4rem);
   font-weight: 700;
   color: var(--color-ink-soft);
 }
 
-.level2-stub__home {
+.level-stub__home {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-ink-soft);
@@ -24,6 +24,6 @@
   transition: color 160ms ease;
 }
 
-.level2-stub__home:hover {
+.level-stub__home:hover {
   color: var(--color-ink);
 }

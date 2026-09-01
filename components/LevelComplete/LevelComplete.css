@@ -73,6 +73,19 @@
   color: var(--color-ink);
 }
 
+/* Quietest action: leave the level entirely */
+.level-complete__home {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-ink-faint);
+  padding: 0.25em 0.5em;
+  transition: color 160ms ease;
+}
+
+.level-complete__home:hover {
+  color: var(--color-ink-soft);
+}
+
 @keyframes complete-pop {
   from {
     opacity: 0;

@@ -19,6 +19,11 @@ const GameStore = Vue.reactive({
   unlockedLevel: 1,
   completedLevels: [],
 
+  /* Highest level that actually exists in this build. Progress may
+     unlock levels beyond this (the stub stands in for them), but
+     navigation should never send the player past it. */
+  maxLevel: 2,
+
   /* ---- session state (current level) -------------------------- */
   level: 1,
   attempts: 0,          // presses this attempt
@@ -60,6 +65,17 @@ const GameStore = Vue.reactive({
 
   recordPress() {
     if (this.buttonEnabled && !this.levelComplete) this.attempts++;
+  },
+
+  /* Playable = exists in this build AND unlocked by progress. */
+  isUnlocked(level) {
+    return level >= 1 && level <= this.maxLevel && level <= this.unlockedLevel;
+  },
+
+  /* Where "Press the button" on the home screen should take the
+     player: the current frontier, never past what exists. */
+  frontierLevel() {
+    return Math.max(1, Math.min(this.unlockedLevel, this.maxLevel));
   },
 
   /* Mark the current level solved and unlock the next one. */

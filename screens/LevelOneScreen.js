@@ -4,12 +4,13 @@
    All gameplay state lives in GameStore; this screen owns only
    the moment's presentation state (burst, flash, bubble, panel).
 
-   Emits: next (player chooses to proceed), replay (restart fresh).
+   Emits: next (player chooses to proceed), replay (restart fresh),
+          home (back to the home screen).
    ============================================================ */
 
 const LevelOneScreen = {
   name: "LevelOneScreen",
-  emits: ["next", "replay"],
+  emits: ["next", "replay", "home"],
 
   components: {
     LevelHeader,
@@ -49,6 +50,7 @@ const LevelOneScreen = {
           :level="store.level"
           @next="$emit('next')"
           @replay="$emit('replay')"
+          @home="$emit('home')"
         />
       </div>
 

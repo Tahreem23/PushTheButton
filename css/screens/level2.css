@@ -1,0 +1,78 @@
+/* ============================================================
+   Level 2 — the evasive button.
+
+   The level renders as an absolute canvas covering the stage;
+   the mover (button + bubble) glides via transform only, so
+   chasing it never triggers layout work per frame.
+
+   Success beats reuse the shared keyframes from level1.css
+   (stage-nod / stage-leave) — every level celebrates the same way.
+   ============================================================ */
+
+/* Absolute coordinate space the mover is positioned inside. */
+.level2 {
+  position: absolute;
+  inset: 0;
+}
+
+/* The moving unit: bubble above, button below, gliding as one.
+   JavaScript owns the translate() — CSS only owns how it feels. */
+.level2__mover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  justify-items: center;
+  will-change: transform;
+}
+
+/* Enabled only after initial placement — the button must never
+   glide in from 0,0 when the player enters the level. */
+.level2__mover.is-gliding {
+  transition: transform 300ms var(--ease-press);
+}
+
+/* Bubble row: fixed reserve so the mover's measured box always
+   includes the bubble — nothing ever escapes the stage bounds. */
+.level2__bubble-anchor {
+  height: clamp(2.6rem, 7vmin, 3.2rem);
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding-bottom: 6px;
+}
+
+/* Button row: anchors the celebration burst to the button. */
+.level2__button-slot {
+  position: relative;
+}
+
+.level2__button-slot .celebration-burst {
+  inset: 0;
+}
+
+/* ---- Success sequence (shared keyframes live in level1.css) --- */
+
+.level2-screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+.level2-screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+.level2-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+}
+
+/* ---- Accessibility ------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .level2__mover.is-gliding {
+    transition-duration: 1ms;
+  }
+}

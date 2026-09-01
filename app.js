@@ -8,7 +8,8 @@
    Routing rules:
      home     → home screen
      level1   → Level 1 (remounted fresh on every entry/replay)
-     level2   → stub until Level 2 is designed
+     level2   → Level 2 (remounted fresh on every entry/replay)
+     level3   → stub until Level 3 is designed
    ============================================================ */
 
 const app = Vue.createApp({
@@ -17,7 +18,8 @@ const app = Vue.createApp({
   components: {
     HomeScreen,
     LevelOneScreen,
-    LevelTwoStubScreen,
+    LevelTwoScreen,
+    LevelStubScreen,
   },
 
   template: /* html */ `
@@ -26,13 +28,23 @@ const app = Vue.createApp({
 
       <level-one-screen
         v-else-if="screen === 'level1'"
-        :key="'level1-' + run"
+        :key="'level1-' + run1"
         @next="goTo('level2')"
         @replay="goTo('level1')"
+        @home="goTo('home')"
       />
 
-      <level-two-stub-screen
+      <level-two-screen
         v-else-if="screen === 'level2'"
+        :key="'level2-' + run2"
+        @next="goTo('level3')"
+        @replay="goTo('level2')"
+        @home="goTo('home')"
+      />
+
+      <level-stub-screen
+        v-else-if="screen === 'level3'"
+        :level="3"
         @home="goTo('home')"
       />
 
@@ -44,7 +56,8 @@ const app = Vue.createApp({
     return {
       screen: "home",
       transitioning: false,
-      run: 0, // bumped to remount Level 1 in a pristine state
+      run1: 0, // bumped to remount a level in a pristine state
+      run2: 0,
     };
   },
 
@@ -53,8 +66,14 @@ const app = Vue.createApp({
   },
 
   methods: {
-    startGame() {
-      this.goTo("level" + GameStore.unlockedLevel);
+    /* The home button continues at the frontier; the level pills
+       pass an explicit level to replay an earlier one. */
+    startGame(level) {
+      const target =
+        typeof level === "number" && GameStore.isUnlocked(level)
+          ? level
+          : GameStore.frontierLevel();
+      this.goTo("level" + target);
     },
 
     goTo(next) {
@@ -63,7 +82,8 @@ const app = Vue.createApp({
 
       // Swap the scene while the wipe covers the screen.
       setTimeout(() => {
-        if (next === "level1") this.run++; // always enter Level 1 fresh
+        if (next === "level1") this.run1++; // always enter a level fresh
+        if (next === "level2") this.run2++;
         this.screen = next;
       }, 220);
       setTimeout(() => (this.transitioning = false), 320);

@@ -1,9 +1,11 @@
 /* ============================================================
    HomeScreen — the front door of the game.
 
-   One button, one whispered invitation, nothing else.
-   Pressing the button emits `start`; the router (app.js)
-   animates into the next scene.
+   One button, one whispered invitation… plus a quiet row of
+   level pills so finished levels stay replayable. Pressing the
+   button starts the frontier level (emits `start`); a pill
+   replays that level (emits `start` with the level number).
+   The router (app.js) animates into the chosen scene.
    ============================================================ */
 
 const HomeScreen = {
@@ -34,7 +36,29 @@ const HomeScreen = {
         </div>
 
         <p class="home__invite">Go on...</p>
+
+        <nav class="home__levels" aria-label="Choose a level">
+          <button
+            v-for="level in store.maxLevel"
+            :key="level"
+            type="button"
+            class="home__level"
+            :class="{
+              'is-locked': !store.isUnlocked(level),
+              'is-done': store.completedLevels.includes(level),
+            }"
+            :disabled="!store.isUnlocked(level)"
+            :aria-label="'Level ' + level"
+            @click="$emit('start', level)"
+          >
+            {{ level }}
+          </button>
+        </nav>
       </main>
     </div>
   `,
+
+  data() {
+    return { store: GameStore };
+  },
 };
