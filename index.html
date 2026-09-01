@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Push the Button — Level 1</title>
+  <title>Push the Button</title>
 
   <!-- Typography: Nunito — rounded, friendly, premium -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,6 +20,11 @@
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/base.css" />
 
+  <!-- Screen composition -->
+  <link rel="stylesheet" href="css/screens/transitions.css" />
+  <link rel="stylesheet" href="css/screens/home.css" />
+  <link rel="stylesheet" href="css/screens/level1.css" />
+
   <!-- Components -->
   <link rel="stylesheet" href="components/LevelHeader/LevelHeader.css" />
   <link rel="stylesheet" href="components/SettingsButton/SettingsButton.css" />
@@ -27,17 +32,23 @@
   <link rel="stylesheet" href="components/PushButton/PushButton.css" />
   <link rel="stylesheet" href="components/SpeechBubble/SpeechBubble.css" />
   <link rel="stylesheet" href="components/CelebrationBurst/CelebrationBurst.css" />
-  <link rel="stylesheet" href="css/level1.css" />
 </head>
 <body>
   <div id="app"></div>
 
-  <script src="components/SpeechBubble/SpeechBubble.js"></script>
+  <!-- Components -->
   <script src="components/SettingsButton/SettingsButton.js"></script>
   <script src="components/LevelHeader/LevelHeader.js"></script>
-  <script src="components/PushButton/PushButton.js"></script>
   <script src="components/GameArea/GameArea.js"></script>
+  <script src="components/SpeechBubble/SpeechBubble.js"></script>
+  <script src="components/PushButton/PushButton.js"></script>
   <script src="components/CelebrationBurst/CelebrationBurst.js"></script>
+
+  <!-- Screens -->
+  <script src="screens/HomeScreen.js"></script>
+  <script src="screens/LevelOneScreen.js"></script>
+
+  <!-- App shell + router -->
   <script src="app.js"></script>
 </body>
 </html>

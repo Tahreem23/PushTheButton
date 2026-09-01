@@ -1,0 +1,108 @@
+/* ============================================================
+   Home — screen composition.
+   One button, one whispered invitation, nothing else.
+
+   PLACEMENT LAW: the button IS the anchor of the game.
+   The button slot is centered in the screen's main region and
+   everything around it (title, invitation) is positioned as an
+   offset FROM the button — so the button lands at the exact
+   same viewport position on every screen.
+   ============================================================ */
+
+/* Settings alone in the top corner — the title belongs down here,
+   with the button */
+.home__bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: clamp(14px, 2.5vmin, 22px) clamp(16px, 3vmin, 28px);
+}
+
+.home__main {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/* The anchor. Centered in the main region; nothing in-flow sits
+   above or below it. */
+.home__button-slot {
+  position: relative;
+  animation: home-arrive 550ms var(--ease-bounce) both;
+}
+
+.home__button-slot .celebration-burst {
+  inset: 0;
+}
+
+/* Game title: hangs above the button, offset from the anchor */
+.home__title {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% + var(--button-size) * 1.16);
+  transform: translateX(-50%);
+
+  font-size: clamp(1.3rem, 4.4vmin, 1.9rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  padding-left: 0.3em; /* optically recenter tracked caps */
+  white-space: nowrap;
+
+  animation: home-text-in 500ms ease-out 150ms both;
+}
+
+/* The playful invitation under the button */
+.home__invite {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--button-size) * 1.16);
+  transform: translateX(-50%);
+
+  font-size: clamp(1rem, 2.8vmin, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft);
+  transition: color 200ms ease;
+
+  animation: home-text-in 500ms ease-out 350ms both;
+}
+
+/* The invitation gets a little braver while the cursor lingers
+   on the button */
+.home-screen:has(.push-button:hover) .home__invite {
+  color: var(--color-ink);
+}
+
+/* ---- Entrance -------------------------------------------------------
+   The title/invite are translateX(-50%)-centered, so their entrance
+   keyframes carry the X-centering along. */
+
+@keyframes home-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(1.5vmin) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes home-text-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.4em);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__button-slot,
+  .home__title,
+  .home__invite {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+}

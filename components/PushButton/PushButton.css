@@ -149,6 +149,27 @@
   transition: transform var(--dur-press) var(--ease-press);
 }
 
+/* Engraved label — lettering molded INTO the red plastic, not printed
+   on top: dark recess above the glyphs, a hint of sheen below them. */
+.push-button .push-button__label {
+  inset: 0;
+  transform: none;
+  display: grid;
+  place-items: center;
+
+  font-weight: 800;
+  font-size: calc(var(--s) * 0.19);
+  letter-spacing: 0.18em;
+  padding-left: 0.18em; /* optically recenter the tracked text */
+  padding-top: calc(var(--s) * 0.02); /* dome highlight sits high; text sits low */
+
+  /* Warm, friendly red recess — molded into the plastic, not carved */
+  color: rgba(154, 32, 18, 0.88);
+  text-shadow:
+    0 calc(var(--s) * -0.008) calc(var(--s) * 0.012) rgba(96, 12, 5, 0.35),
+    0 calc(var(--s) * 0.008) 1px rgba(255, 255, 255, 0.35);
+}
+
 /* Specular highlight — the glossy streak */
 .push-button__top::before {
   content: "";

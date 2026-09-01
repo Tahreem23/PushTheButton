@@ -1,0 +1,23 @@
+/* ============================================================
+   Screen transitions — the warm wipe that covers scene swaps.
+   Like a blink: the cream rises, the world changes, it lifts.
+   ============================================================ */
+
+.app-root {
+  height: 100%;
+  position: relative;
+}
+
+.screen-wipe {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--color-bg);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 50;
+}
+
+.screen-wipe.is-active {
+  opacity: 1;
+}

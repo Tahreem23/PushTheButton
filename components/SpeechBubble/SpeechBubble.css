@@ -10,6 +10,7 @@
   font-weight: 800;
   font-size: clamp(1rem, 2.6vmin, 1.25rem);
   padding: 0.55em 1.1em;
+  white-space: nowrap; /* button speaks in short lines — never wrap */
   border-radius: 1.2em;
   box-shadow:
     0 8px 18px -8px rgba(51, 40, 30, 0.25),

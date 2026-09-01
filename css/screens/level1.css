@@ -1,20 +1,15 @@
 /* ============================================================
    Level 1 — screen composition & success sequence.
-   Component styles live with their components; this file only
-   owns how Level 1 arranges them and reacts to success.
+
+   PLACEMENT LAW: the button IS the anchor of the game. The
+   button slot is centered in the play stage and the bubble is
+   positioned as an offset FROM the button — the button lands at
+   the exact same viewport position as on the home screen.
    ============================================================ */
 
-/* Bubble above the button, speech-distance away from the dome */
+/* Anchor container: centers its lone in-flow child (the button). */
 .level1 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: calc(var(--button-size) * 0.42);
-}
-
-/* Fixed slot so the bubble leaving doesn't shift the button */
-.level1__bubble-slot {
-  height: clamp(2.6rem, 7vmin, 3.2rem);
+  position: relative;
   display: grid;
   place-items: center;
 }
@@ -25,6 +20,19 @@
 
 .level1__button-slot .celebration-burst {
   inset: 0;
+}
+
+/* Bubble floats at speech distance above the button — out of flow,
+   so it never nudges the anchor */
+.level1__bubble-slot {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% + var(--button-size) * 1.13);
+  transform: translateX(-50%);
+
+  height: clamp(2.6rem, 7vmin, 3.2rem);
+  display: grid;
+  place-items: center;
 }
 
 /* The bubble gets excited when the cursor reaches for the button */
@@ -50,31 +58,10 @@
 }
 
 /* ---- Very subtle screen feedback on press --------------------------- */
-
-.screen-flash {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    60% 60% at 50% 55%,
-    rgba(255, 194, 75, 0.10),
-    rgba(255, 194, 75, 0) 70%
-  );
-  opacity: 0;
-}
-
-.screen-flash.is-active {
-  animation: screen-flash 260ms ease-out both;
-}
-
-@keyframes screen-flash {
-  0%   { opacity: 0; }
-  25%  { opacity: 1; }
-  100% { opacity: 0; }
-}
+/* (The warm screen-flash lives in css/base.css — shared by all screens.) */
 
 /* Play area gives the tiniest appreciative nod */
-.screen.is-hit .game-area__stage {
+.level1-screen.is-hit .game-area__stage {
   animation: stage-nod 220ms ease-out both;
 }
 
@@ -87,7 +74,7 @@
 /* ---- Transition toward the next level (mockup stub) ----------------- */
 /* A soft warm sweep; in the real game the router takes over here. */
 
-.screen.is-leaving .game-area__stage {
+.level1-screen.is-leaving .game-area__stage {
   animation: stage-leave 500ms ease-in both;
 }
 

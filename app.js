@@ -1,80 +1,43 @@
 /* ============================================================
-   Level 1 — screen assembly (mockup).
+   Push the Button — app shell + screen router.
 
-   This file owns Level 1's flow only. It composes the reusable
-   components and plays the success sequence:
-
-     press → burst + subtle screen feedback
-           → soft transition sweep
-           → (mockup) reset so the design can be reviewed again
-
-   The real game loops here (routing / game state) will replace
-   the reset once the architecture is defined.
+   A single Vue app owns the whole game. Screens are scenes,
+   swapped under a soft warm wipe so the player never feels
+   a page load.
    ============================================================ */
 
 const app = Vue.createApp({
-  name: "LevelOneScreen",
+  name: "PushTheButton",
 
   components: {
-    LevelHeader,
-    SettingsButton,
-    GameArea,
-    PushButton,
-    SpeechBubble,
-    CelebrationBurst,
+    HomeScreen,
+    LevelOneScreen,
   },
 
   template: /* html */ `
-    <div class="screen" :class="{ 'is-hit': hitTick, 'is-leaving': leaving }">
-      <level-header :level="1" />
+    <div class="app-root">
+      <home-screen v-if="screen === 'home'" @start="goTo('level1')" />
+      <level-one-screen v-else-if="screen === 'level1'" @finished="goTo('home')" />
 
-      <game-area>
-        <div class="level1">
-          <div class="level1__bubble-slot">
-            <transition name="bubble-pop">
-              <speech-bubble v-if="bubbleVisible" />
-            </transition>
-          </div>
-
-          <div class="level1__button-slot">
-            <push-button ref="button" @success="onSuccess" />
-            <celebration-burst :burst="burstCount" />
-          </div>
-        </div>
-      </game-area>
-
-      <div class="screen-flash" :class="{ 'is-active': flashing }"></div>
+      <div class="screen-wipe" :class="{ 'is-active': transitioning }"></div>
     </div>
   `,
 
   data() {
     return {
-      burstCount: 0,
-      bubbleVisible: true,
-      flashing: false,
-      hitTick: false,
-      leaving: false,
+      screen: "home",
+      transitioning: false,
     };
   },
 
   methods: {
-    onSuccess() {
-      // 1. Celebrate — restrained.
-      this.burstCount++;
-      this.bubbleVisible = false;
-      this.flashing = true;
-      this.hitTick = true;
-      setTimeout(() => ((this.flashing = false), (this.hitTick = false)), 280);
+    goTo(next) {
+      if (this.transitioning) return;
+      this.transitioning = true;
 
-      // 2. Transition toward the next level…
-      setTimeout(() => (this.leaving = true), 800);
-
-      // 3. …then reset. (Mockup behavior; becomes "navigate to Level 2".)
-      setTimeout(() => {
-        this.leaving = false;
-        this.$refs.button.reset();
-        setTimeout(() => (this.bubbleVisible = true), 150);
-      }, 1400);
+      // Swap the scene while the wipe covers the screen.
+      setTimeout(() => (this.screen = next), 220);
+      setTimeout(() => (this.transitioning = false), 320);
     },
   },
 });

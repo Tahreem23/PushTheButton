@@ -13,6 +13,11 @@ const PushButton = {
   name: "PushButton",
   emits: ["press", "success"],
 
+  props: {
+    /* Engraved lettering on the dome (e.g. "PUSH"). Optional. */
+    label: { type: String, default: "" },
+  },
+
   template: /* html */ `
     <button
       ref="el"
@@ -29,7 +34,9 @@ const PushButton = {
       <span class="push-button__base"></span>
       <span class="push-button__cap">
         <span class="push-button__side"></span>
-        <span class="push-button__top"></span>
+        <span class="push-button__top">
+          <span v-if="label" class="push-button__label">{{ label }}</span>
+        </span>
       </span>
     </button>
   `,
