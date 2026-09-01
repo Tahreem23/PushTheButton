@@ -14,6 +14,12 @@
 
 const SAVE_KEY = "ptb.save.v1";
 
+/* Progress persistence switch — currently OFF: every reload starts
+   fresh at Level 1 (in-session progress still unlocks normally).
+   Flip to true to restore the save system; any previously stored
+   localStorage progress is left untouched and will reappear. */
+const PERSIST_PROGRESS = false;
+
 const GameStore = Vue.reactive({
   /* ---- persisted progress ------------------------------------ */
   unlockedLevel: 1,
@@ -32,6 +38,7 @@ const GameStore = Vue.reactive({
   buttonEnabled: true,  // false once the level is solved
 
   load() {
+    if (!PERSIST_PROGRESS) return;
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return;
@@ -46,6 +53,7 @@ const GameStore = Vue.reactive({
   },
 
   save() {
+    if (!PERSIST_PROGRESS) return;
     localStorage.setItem(
       SAVE_KEY,
       JSON.stringify({
