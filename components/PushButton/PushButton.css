@@ -248,6 +248,25 @@
   100% { transform: translateX(-50%) scale(1); filter: blur(2px); }
 }
 
+/* Disabled — the toy goes quiet: muted, still, no longer inviting */
+.push-button.is-disabled {
+  cursor: default;
+}
+
+.push-button.is-disabled .push-button__cap {
+  animation-play-state: paused;
+  filter: saturate(0.55);
+}
+
+.push-button.is-disabled .push-button__top {
+  transition: none;
+  filter: saturate(0.7) brightness(1.06);
+}
+
+.push-button.is-disabled .push-button__label {
+  opacity: 0.6;
+}
+
 /* ============================================================
    Accessibility
    ============================================================ */

@@ -29,6 +29,7 @@ body {
 /* The screen shell: header row pinned to top, play area fills the rest. */
 .screen {
   height: 100%;
+  position: relative; /* anchors screen overlays (e.g. complete panel) */
   display: grid;
   grid-template-rows: auto 1fr;
 }

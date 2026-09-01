@@ -1,14 +1,15 @@
 /* ============================================================
-   LevelOneScreen — the first bite of gameplay.
+   LevelOneScreen — Level 1: press the button once. That's it.
 
-   Flow: bubble begs → press → celebrate (burst + warm flash +
-   stage nod) → the stage leans away → emit `finished` so the
-   router can sweep us toward Level 2.
+   All gameplay state lives in GameStore; this screen owns only
+   the moment's presentation state (burst, flash, bubble, panel).
+
+   Emits: next (player chooses to proceed), replay (restart fresh).
    ============================================================ */
 
 const LevelOneScreen = {
   name: "LevelOneScreen",
-  emits: ["finished"],
+  emits: ["next", "replay"],
 
   components: {
     LevelHeader,
@@ -17,11 +18,12 @@ const LevelOneScreen = {
     PushButton,
     SpeechBubble,
     CelebrationBurst,
+    LevelComplete,
   },
 
   template: /* html */ `
     <div class="screen level1-screen" :class="{ 'is-hit': hitTick, 'is-leaving': leaving }">
-      <level-header :level="1" />
+      <level-header :level="store.level" />
 
       <game-area>
         <div class="level1">
@@ -32,11 +34,23 @@ const LevelOneScreen = {
           </div>
 
           <div class="level1__button-slot">
-            <push-button ref="button" @success="onSuccess" />
+            <push-button
+              ref="button"
+              :disabled="!store.buttonEnabled"
+              @success="onSuccess"
+            />
             <celebration-burst :burst="burstCount" />
           </div>
         </div>
       </game-area>
+
+      <div v-if="panelVisible" class="level1-overlay">
+        <level-complete
+          :level="store.level"
+          @next="$emit('next')"
+          @replay="$emit('replay')"
+        />
+      </div>
 
       <div class="screen-flash" :class="{ 'is-active': flashing }"></div>
     </div>
@@ -44,28 +58,39 @@ const LevelOneScreen = {
 
   data() {
     return {
+      store: GameStore,
       burstCount: 0,
       bubbleVisible: true,
       flashing: false,
       hitTick: false,
       leaving: false,
+      panelVisible: false,
     };
   },
 
+  created() {
+    // Entering the level resets its session state (replay included).
+    GameStore.startLevel(1);
+  },
+
   methods: {
+    /* The objective: one press. Store completes the level here. */
     onSuccess() {
       if (this.leaving) return;
       this.leaving = true;
 
-      // Celebrate — restrained.
+      GameStore.recordPress();
+      GameStore.completeLevel();
+
+      // Celebrate — restrained (existing success sequence, unchanged).
       this.burstCount++;
       this.bubbleVisible = false;
       this.flashing = true;
       this.hitTick = true;
       setTimeout(() => ((this.flashing = false), (this.hitTick = false)), 280);
 
-      // Hand the moment to the router — it takes us toward Level 2.
-      setTimeout(() => this.$emit("finished"), 900);
+      // The stage bows out as the success panel takes the spotlight.
+      setTimeout(() => (this.panelVisible = true), 550);
     },
   },
 };

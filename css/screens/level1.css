@@ -71,11 +71,18 @@
   100% { transform: translateY(0); }
 }
 
-/* ---- Transition toward the next level (mockup stub) ----------------- */
-/* A soft warm sweep; in the real game the router takes over here. */
+/* ---- Success: stage bows out, completion panel takes over ----------- */
 
 .level1-screen.is-leaving .game-area__stage {
   animation: stage-leave 500ms ease-in both;
+}
+
+.level1-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
 }
 
 @keyframes stage-leave {

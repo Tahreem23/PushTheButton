@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="css/screens/transitions.css" />
   <link rel="stylesheet" href="css/screens/home.css" />
   <link rel="stylesheet" href="css/screens/level1.css" />
+  <link rel="stylesheet" href="css/screens/stub.css" />
 
   <!-- Components -->
   <link rel="stylesheet" href="components/LevelHeader/LevelHeader.css" />
@@ -32,9 +33,13 @@
   <link rel="stylesheet" href="components/PushButton/PushButton.css" />
   <link rel="stylesheet" href="components/SpeechBubble/SpeechBubble.css" />
   <link rel="stylesheet" href="components/CelebrationBurst/CelebrationBurst.css" />
+  <link rel="stylesheet" href="components/LevelComplete/LevelComplete.css" />
 </head>
 <body>
   <div id="app"></div>
+
+  <!-- Game state -->
+  <script src="stores/game.js"></script>
 
   <!-- Components -->
   <script src="components/SettingsButton/SettingsButton.js"></script>
@@ -43,10 +48,12 @@
   <script src="components/SpeechBubble/SpeechBubble.js"></script>
   <script src="components/PushButton/PushButton.js"></script>
   <script src="components/CelebrationBurst/CelebrationBurst.js"></script>
+  <script src="components/LevelComplete/LevelComplete.js"></script>
 
   <!-- Screens -->
   <script src="screens/HomeScreen.js"></script>
   <script src="screens/LevelOneScreen.js"></script>
+  <script src="screens/LevelTwoStubScreen.js"></script>
 
   <!-- App shell + router -->
   <script src="app.js"></script>

@@ -16,13 +16,16 @@ const PushButton = {
   props: {
     /* Engraved lettering on the dome (e.g. "PUSH"). Optional. */
     label: { type: String, default: "" },
+    /* Levels disable the button once the objective is met. */
+    disabled: { type: Boolean, default: false },
   },
 
   template: /* html */ `
     <button
       ref="el"
       class="push-button"
-      :class="stateClass"
+      :class="[stateClass, { 'is-disabled': disabled }]"
+      :disabled="disabled"
       type="button"
       aria-label="Push the button"
       @pointerdown="onPress"
@@ -53,7 +56,7 @@ const PushButton = {
 
   methods: {
     onPress() {
-      if (this.state !== "idle") return;
+      if (this.disabled || this.state !== "idle") return;
       this.state = "pressed";
       this.$emit("press");
     },

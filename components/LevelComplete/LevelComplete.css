@@ -1,0 +1,85 @@
+/* ============================================================
+   LevelComplete — the "you did it" panel after a level solves.
+   Restrained card in the design system's language.
+   ============================================================ */
+
+.level-complete {
+  background: var(--color-surface);
+  border-radius: var(--game-area-radius);
+  padding: clamp(1.6rem, 5vmin, 2.4rem) clamp(2rem, 6vmin, 3rem);
+
+  text-align: center;
+  box-shadow:
+    0 18px 36px -14px rgba(51, 40, 30, 0.22),
+    0 4px 10px -4px rgba(51, 40, 30, 0.12);
+
+  animation: complete-pop 420ms var(--ease-bounce) both;
+}
+
+.level-complete__label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.level-complete__heading {
+  margin-top: 0.5rem;
+  font-size: clamp(1.6rem, 5vmin, 2.2rem);
+  font-weight: 900;
+  color: var(--color-ink);
+}
+
+.level-complete__actions {
+  margin-top: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.level-complete__next {
+  padding: 0.8em 1.8em;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8px 16px -8px rgba(51, 40, 30, 0.45);
+  transition: transform 160ms var(--ease-bounce), box-shadow 160ms ease;
+}
+
+.level-complete__next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -8px rgba(51, 40, 30, 0.45);
+}
+
+.level-complete__next:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 8px -4px rgba(51, 40, 30, 0.45);
+}
+
+.level-complete__replay {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  padding: 0.25em 0.5em;
+  transition: color 160ms ease;
+}
+
+.level-complete__replay:hover {
+  color: var(--color-ink);
+}
+
+@keyframes complete-pop {
+  from {
+    opacity: 0;
+    transform: translateY(0.8em) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
