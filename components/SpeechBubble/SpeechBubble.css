@@ -36,8 +36,10 @@
 }
 
 /* The bubble gets excited when the cursor reaches for the button.
-   Shared by every screen that hosts both. */
-.screen:has(.push-button:not(.is-disabled):hover) .speech-bubble {
+   Shared by every screen that hosts both — except banter bubbles,
+   whose pop-in this rule would otherwise restart as the cursor
+   passes over the button (Level 3 dialogue must appear ONCE). */
+.screen:has(.push-button:not(.is-disabled):hover) .speech-bubble:not(.speech-bubble--banter) {
   animation: bubble-excited 380ms ease-in-out infinite;
 }
 
