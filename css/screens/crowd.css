@@ -1,0 +1,114 @@
+/* ============================================================
+   Level 4 — The Crowd.
+
+   Five small buttons standing in fixed spots on the stage.
+   Each can pop larger for a moment (pure showmanship — it means
+   NOTHING about which button is real) and plead its case in a
+   banter bubble above itself.
+
+   Transform layers are kept separate on purpose:
+     .crowd-btn   position only (left/top % + centering)
+     .crowd-pop   scale transition (the pop)
+     .crowd-slot  shake animation (wrong press) + burst anchor
+   so a shake can never fight a pop.
+
+   Success beats reuse the shared keyframes from level1.css
+   (stage-nod / stage-leave) — every level celebrates the same way.
+   ============================================================ */
+
+/* Absolute coordinate space; spots are expressed in % of it. */
+.crowd-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Position layer — the button center sits on its spot. */
+.crowd-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+}
+
+/* The button that's talking floats above its neighbours — otherwise
+   a nearby button can paint OVER its dialogue and cut it off. */
+.crowd-btn:has(.speech-bubble) {
+  z-index: 2;
+}
+
+/* Bubble row: fixed reserve so the canvas never jogs the buttons.
+   The padding-bottom is the air between bubble (and its tail) and
+   the button below. */
+.crowd-bubble-anchor {
+  height: clamp(2.5rem, 6.4vmin, 3rem);
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding-bottom: 12px;
+}
+
+/* Crowd chatter is compact — smaller than the hero "Press me!" */
+.crowd-bubble-anchor .speech-bubble {
+  font-size: clamp(0.78rem, 2vmin, 0.95rem);
+  padding: 0.45em 0.9em;
+}
+
+/* Pop layer: brief, bouncy, attention-grabbing. --pop-scale comes
+   from the level's tuning (inline style on .crowd-slot). */
+.crowd-pop {
+  transition: transform 180ms var(--ease-bounce);
+  transform-origin: center bottom;
+}
+
+.crowd-pop.is-popped {
+  transform: scale(var(--pop-scale, 1.4));
+}
+
+/* Shake layer (wrong press): cheeky little "nope" wiggle. */
+.crowd-slot {
+  position: relative; /* anchors the celebration burst to the button */
+}
+
+.crowd-slot .celebration-burst {
+  inset: 0;
+}
+
+.crowd-slot.is-shaking {
+  animation: crowd-shake 320ms ease-in-out;
+}
+
+@keyframes crowd-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25%      { transform: translateX(-4px) rotate(-3deg); }
+  50%      { transform: translateX(4px) rotate(3deg); }
+  75%      { transform: translateX(-2px) rotate(-1.5deg); }
+}
+
+/* ---- Success sequence (shared keyframes live in level1.css) --- */
+
+.crowd-screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+.crowd-screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+.crowd-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+}
+
+/* ---- Accessibility ------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .crowd-pop {
+    transition-duration: 1ms;
+  }
+  .crowd-slot.is-shaking {
+    animation-duration: 1ms;
+  }
+}

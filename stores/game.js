@@ -14,11 +14,10 @@
 
 const SAVE_KEY = "ptb.save.v1";
 
-/* Progress persistence switch — currently OFF: every reload starts
-   fresh at Level 1 (in-session progress still unlocks normally).
-   Flip to true to restore the save system; any previously stored
-   localStorage progress is left untouched and will reappear. */
-const PERSIST_PROGRESS = false;
+/* Progress persistence switch — currently ON: completed levels and
+   unlocks survive a reload via localStorage. Set to false to make
+   every reload start fresh at Level 1 without deleting saved data. */
+const PERSIST_PROGRESS = true;
 
 const GameStore = Vue.reactive({
   /* ---- persisted progress ------------------------------------ */
@@ -28,7 +27,7 @@ const GameStore = Vue.reactive({
   /* Highest level that actually exists in this build. Progress may
      unlock levels beyond this (the stub stands in for them), but
      navigation should never send the player past it. */
-  maxLevel: 3,
+  maxLevel: 4,
 
   /* ---- session state (current level) -------------------------- */
   level: 1,

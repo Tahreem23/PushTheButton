@@ -10,7 +10,8 @@
      level1   → Level 1 (remounted fresh on every entry/replay)
      level2   → Level 2 (remounted fresh on every entry/replay)
      level3   → Level 3 (remounted fresh on every entry/replay)
-     level4   → stub until Level 4 is designed
+     level4   → Level 4 (remounted fresh on every entry/replay)
+     level5   → stub until Level 5 is designed
    ============================================================ */
 
 const app = Vue.createApp({
@@ -21,6 +22,7 @@ const app = Vue.createApp({
     LevelOneScreen,
     LevelTwoScreen,
     LevelThreeScreen,
+    LevelFourScreen,
     LevelStubScreen,
   },
 
@@ -52,9 +54,17 @@ const app = Vue.createApp({
         @home="goTo('home')"
       />
 
-      <level-stub-screen
+      <level-four-screen
         v-else-if="screen === 'level4'"
-        :level="4"
+        :key="'level4-' + run4"
+        @next="goTo('level5')"
+        @replay="goTo('level4')"
+        @home="goTo('home')"
+      />
+
+      <level-stub-screen
+        v-else-if="screen === 'level5'"
+        :level="5"
         @home="goTo('home')"
       />
 
@@ -69,6 +79,7 @@ const app = Vue.createApp({
       run1: 0, // bumped to remount a level in a pristine state
       run2: 0,
       run3: 0,
+      run4: 0,
     };
   },
 
@@ -96,6 +107,7 @@ const app = Vue.createApp({
         if (next === "level1") this.run1++; // always enter a level fresh
         if (next === "level2") this.run2++;
         if (next === "level3") this.run3++;
+        if (next === "level4") this.run4++;
         this.screen = next;
       }, 220);
       setTimeout(() => (this.transitioning = false), 320);

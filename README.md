@@ -98,10 +98,10 @@ Key patterns to know:
 `GameStore` is a `Vue.reactive` object used directly as `store` in screens.
 Groups:
 
-- **(Currently disabled) persisted progress**: `unlockedLevel`,
-  `completedLevels`, `load()`, `save()` behind the `PERSIST_PROGRESS`
-  flag (top of file, currently `false` — every reload starts at Level 1;
-  flip to `true` to restore saves; stored data is untouched).
+- **Persisted progress**: `unlockedLevel`, `completedLevels`, `load()`,
+  `save()` behind the `PERSIST_PROGRESS` flag (top of file, currently
+  `true` — progress survives reloads; flip to `false` for fresh starts
+  without deleting stored data).
 - **Derived navigation**: `maxLevel` (highest level that EXISTS — bump it
   when adding a level), `isUnlocked(n)`, `frontierLevel()`.
 - **Session state**: `level`, `attempts`, `levelComplete`, `buttonEnabled`.
@@ -206,5 +206,6 @@ happen silently during the sulk).
 - **Load order in `index.html`:** `stores/game.js` → `shared/` mixins →
   components → screens → `app.js`. Everything is globals; there are no
   modules.
-- **Persistence is OFF** (`PERSIST_PROGRESS = false` in `stores/game.js`).
-  Reload = fresh game. This is intentional.
+- **Persistence is ON** (`PERSIST_PROGRESS = true` in `stores/game.js`).
+  Progress survives reloads. (It was briefly off by request — check the
+  flag if a reload unexpectedly resets to Level 1.)
