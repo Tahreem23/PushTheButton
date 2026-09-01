@@ -34,11 +34,11 @@
   inset: 0;
 }
 
-/* Game title: hangs above the button, offset from the anchor */
+/* Game title: above the speech bubble, offset from the anchor */
 .home__title {
   position: absolute;
   left: 50%;
-  bottom: calc(50% + var(--button-size) * 1.16);
+  bottom: calc(50% + var(--button-size) * 1.13 + 4rem);
   transform: translateX(-50%);
 
   font-size: clamp(1.3rem, 4.4vmin, 1.9rem);

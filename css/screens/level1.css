@@ -22,29 +22,8 @@
   inset: 0;
 }
 
-/* Bubble floats at speech distance above the button — out of flow,
-   so it never nudges the anchor */
-.level1__bubble-slot {
-  position: absolute;
-  left: 50%;
-  bottom: calc(50% + var(--button-size) * 1.13);
-  transform: translateX(-50%);
-
-  height: clamp(2.6rem, 7vmin, 3.2rem);
-  display: grid;
-  place-items: center;
-}
-
-/* The bubble gets excited when the cursor reaches for the button */
-.level1:has(.push-button:hover) .speech-bubble {
-  animation: bubble-excited 380ms ease-in-out infinite;
-}
-
-@keyframes bubble-excited {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  30%      { transform: translateY(-0.2em) rotate(-2deg); }
-  60%      { transform: translateY(-0.2em) rotate(2deg); }
-}
+/* The bubble anchor + hover excitement live with the SpeechBubble
+   component (css) so every screen shares them. */
 
 /* Bubble transitions (bows out on success, pops back after reset) */
 .bubble-pop-enter-active,

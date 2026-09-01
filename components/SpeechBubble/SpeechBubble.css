@@ -21,6 +21,32 @@
   transform-origin: bottom center;
 }
 
+/* Anchor slot — floats the bubble at speech distance above the
+   button anchor on whichever screen uses it (out of flow, so the
+   bubble never nudges the button's canonical position). */
+.speech-anchor {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% + var(--button-size) * 1.13);
+  transform: translateX(-50%);
+
+  height: clamp(2.6rem, 7vmin, 3.2rem);
+  display: grid;
+  place-items: center;
+}
+
+/* The bubble gets excited when the cursor reaches for the button.
+   Shared by every screen that hosts both. */
+.screen:has(.push-button:not(.is-disabled):hover) .speech-bubble {
+  animation: bubble-excited 380ms ease-in-out infinite;
+}
+
+@keyframes bubble-excited {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(-0.2em) rotate(-2deg); }
+  60%      { transform: translateY(-0.2em) rotate(2deg); }
+}
+
 /* Tail pointing down toward the button */
 .speech-bubble::after {
   content: "";

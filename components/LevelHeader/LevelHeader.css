@@ -19,6 +19,7 @@
   font-size: var(--level-label-size);
   font-weight: 800;
   letter-spacing: 0.22em;
+  padding-left: 0.22em; /* optically recenter: letter-spacing leaks space after the last glyph */
   text-transform: uppercase;
   color: var(--color-ink);
 }

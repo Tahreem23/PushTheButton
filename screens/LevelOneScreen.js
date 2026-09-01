@@ -27,7 +27,7 @@ const LevelOneScreen = {
 
       <game-area>
         <div class="level1">
-          <div class="level1__bubble-slot">
+          <div class="speech-anchor">
             <transition name="bubble-pop">
               <speech-bubble v-if="bubbleVisible" />
             </transition>
