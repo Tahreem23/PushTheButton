@@ -1,0 +1,120 @@
+/* ============================================================
+   Level 6 — Keep your eyes on the button.
+
+   One button that pops in at a random spot, shouts at you, and
+   vanishes again. The station moves via CSS vars (--sx/--sy) so
+   the appear-pop keyframes can share the same positioning values.
+
+   Success beats reuse the shared keyframes from level1.css
+   (stage-nod / stage-leave) — every level celebrates the same way.
+   ============================================================ */
+
+/* Absolute coordinate space; the station is positioned in px. */
+.teleport-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* The one instruction, pinned to the top of the stage.
+   Never intercepts clicks. */
+.teleport-intro {
+  position: absolute;
+  left: 50%;
+  top: clamp(14px, 3.5vmin, 26px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.teleport-intro__title {
+  font-size: clamp(1.05rem, 3.2vmin, 1.35rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* The teleporting station. Hidden with OPACITY so there is never
+   layout churn between appearances; pointer-events gate clicks to
+   the visible phase only. */
+.teleport-station {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(var(--sx, 0px), var(--sy, 0px));
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease-out; /* the vanish */
+}
+
+/* Lights on: a quick pop in the game's entrance language. */
+.teleport-station.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: teleport-in 280ms var(--ease-bounce) both;
+}
+
+@keyframes teleport-in {
+  0% {
+    opacity: 0;
+    transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1);
+  }
+}
+
+/* Button row: anchors the celebration burst to the button. */
+.teleport-slot {
+  position: relative;
+}
+
+.teleport-slot .celebration-burst {
+  inset: 0;
+}
+
+/* The quip bubble: positioned ABOVE the button's current spot by
+   the level, independent of the station — the button can vanish
+   while its last word lingers behind. */
+.teleport-quip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  pointer-events: none;
+  max-width: 12rem;
+}
+
+.teleport-quip .speech-bubble {
+  font-size: clamp(0.78rem, 2vmin, 0.95rem);
+  white-space: normal;
+  text-align: center;
+}
+
+/* ---- Success sequence (shared keyframes live in level1.css) --- */
+
+.teleport-screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+.teleport-screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+.teleport-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+}
+
+/* ---- Accessibility ------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .teleport-station.is-visible {
+    animation-duration: 1ms;
+  }
+}
