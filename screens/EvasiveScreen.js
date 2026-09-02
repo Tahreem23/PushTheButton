@@ -1,5 +1,6 @@
 /* ============================================================
-   LevelTwoScreen — Level 2: the button doesn't want to be pressed.
+   EvasiveScreen — the "evasive" level: the button doesn't want to be
+   pressed.
 
    The button sits innocently in the middle of the stage … until
    the pointer comes too close, at which point it glides away.
@@ -13,8 +14,8 @@
    Emits: next, replay, home.
    ============================================================ */
 
-const LevelTwoScreen = {
-  name: "LevelTwoScreen",
+const EvasiveScreen = {
+  name: "EvasiveScreen",
   emits: ["next", "replay", "home"],
 
   mixins: [EvasiveButton],
@@ -79,7 +80,7 @@ const LevelTwoScreen = {
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(2);
+    GameStore.startLevel("evasive");
   },
 
   methods: {

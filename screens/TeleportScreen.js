@@ -1,5 +1,5 @@
 /* ============================================================
-   LevelFourScreen — Level 4: keep your eyes on the button.
+   TeleportScreen — the "teleport" level: keep your eyes on the button.
 
    One button. It pops into view somewhere random, shouts at you
    for a moment, and vanishes — then pops up somewhere else.
@@ -17,7 +17,7 @@
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
-const LEVEL4_TUNING = {
+const TELEPORT_TUNING = {
   buttonScale: 0.3,       // sneaky and small — same design, token × this
   visibleFor: 700,       // ms per appearance — notice + get there in time
   hiddenFor: 450,         // ms of darkness between appearances
@@ -32,7 +32,7 @@ const LEVEL4_TUNING = {
 };
 
 /* Every line it knows. Short only — it's shouting, not lecturing. */
-const LEVEL4_BANTER = {
+const TELEPORT_BANTER = {
   success: "Ah, you got me!",
   appears: [
     "PRESS ME!",
@@ -55,8 +55,8 @@ function pickBlinkLine(pool, current) {
   return next;
 }
 
-const LevelFourScreen = {
-  name: "LevelFourScreen",
+const TeleportScreen = {
+  name: "TeleportScreen",
   emits: ["next", "replay", "home"],
 
   components: {
@@ -160,14 +160,14 @@ const LevelFourScreen = {
        --button-size token so every part shrinks proportionally. */
     slotStyle() {
       return {
-        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${LEVEL4_TUNING.buttonScale})`,
+        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${TELEPORT_TUNING.buttonScale})`,
       };
     },
   },
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(4);
+    GameStore.startLevel("teleport");
 
     this._timers = [];     // every timeout the level owns
     this._pressing = false; // a press is in flight — the button is pinned
@@ -213,7 +213,7 @@ const LevelFourScreen = {
        real distance from the previous one — never the same place twice
        in a row, never a two-step shuffle. */
     rollSpot() {
-      const t = LEVEL4_TUNING;
+      const t = TELEPORT_TUNING;
       const minX = t.edgeMargin;
       const maxX = this._canvas.w - this._station.w - t.edgeMargin;
       const minY = t.topMargin;
@@ -255,11 +255,11 @@ const LevelFourScreen = {
       if (this.caught) return;
 
       this.pos = this.rollSpot();
-      this.quip = pickBlinkLine(LEVEL4_BANTER.appears, this.quip);
+      this.quip = pickBlinkLine(TELEPORT_BANTER.appears, this.quip);
       this.quipTick++;
       this.visible = true;
 
-      this.later(() => this.vanish(), LEVEL4_TUNING.visibleFor);
+      this.later(() => this.vanish(), TELEPORT_TUNING.visibleFor);
     },
 
     /* Lights out: the button goes, its parting quip stays a beat,
@@ -274,10 +274,10 @@ const LevelFourScreen = {
       }
 
       this.visible = false;
-      this.quip = pickBlinkLine(LEVEL4_BANTER.vanishes, this.quip);
+      this.quip = pickBlinkLine(TELEPORT_BANTER.vanishes, this.quip);
       this.quipTick++;
 
-      this.later(() => this.appear(), LEVEL4_TUNING.hiddenFor);
+      this.later(() => this.appear(), TELEPORT_TUNING.hiddenFor);
     },
 
     onPressStart() {
@@ -298,7 +298,7 @@ const LevelFourScreen = {
       GameStore.recordPress();
       GameStore.completeLevel();
 
-      this.quip = LEVEL4_BANTER.success;
+      this.quip = TELEPORT_BANTER.success;
       this.quipTick++;
       this.burstCount++;
 
@@ -310,9 +310,9 @@ const LevelFourScreen = {
           this.flashing = false;
           this.hitTick = false;
         }, 280);
-      }, LEVEL4_TUNING.bowDelay);
+      }, TELEPORT_TUNING.bowDelay);
 
-      this.later(() => (this.panelVisible = true), LEVEL4_TUNING.panelDelay);
+      this.later(() => (this.panelVisible = true), TELEPORT_TUNING.panelDelay);
     },
   },
 };

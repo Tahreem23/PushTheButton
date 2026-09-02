@@ -1,5 +1,5 @@
 /* ============================================================
-   LevelOneScreen — Level 1: press the button once. That's it.
+   SimpleScreen — the "simple" level: press the button once. That's it.
 
    All gameplay state lives in GameStore; this screen owns only
    the moment's presentation state (burst, flash, bubble, panel).
@@ -8,8 +8,8 @@
           home (back to the home screen).
    ============================================================ */
 
-const LevelOneScreen = {
-  name: "LevelOneScreen",
+const SimpleScreen = {
+  name: "SimpleScreen",
   emits: ["next", "replay", "home"],
 
   components: {
@@ -72,7 +72,7 @@ const LevelOneScreen = {
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(1);
+    GameStore.startLevel("simple");
   },
 
   methods: {

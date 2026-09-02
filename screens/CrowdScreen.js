@@ -1,5 +1,5 @@
 /* ============================================================
-   LevelFiveScreen — Level 5: which one is me?
+   CrowdScreen — the "crowd" level: which one is me?
 
    Five small identical buttons, all real-looking, all loudly
    convinced it is THEM. Exactly one is the real button. There
@@ -16,7 +16,7 @@
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
-const LEVEL5_TUNING = {
+const CROWD_TUNING = {
   buttonCount: 5,
   /* Spots are scattered randomly per mount, in % of the stage, kept
      inside a safe margin (button + bubble must never clip the boundary)
@@ -61,7 +61,7 @@ function scatterSpots(t) {
 }
 
 /* Every line the crowd knows. Short only — they're buttons. */
-const LEVEL5_BANTER = {
+const CROWD_BANTER = {
   success: "Ah, you got me again!",
   invites: [
     "Press me!",
@@ -94,8 +94,8 @@ function pickLine(pool, current) {
   return next;
 }
 
-const LevelFiveScreen = {
-  name: "LevelFiveScreen",
+const CrowdScreen = {
+  name: "CrowdScreen",
   emits: ["next", "replay", "home"],
 
   components: {
@@ -165,12 +165,12 @@ const LevelFiveScreen = {
   data() {
     // Scatter the crowd and choose the real button once per mount (a
     // replay re-does both); the real one never changes mid-attempt.
-    const realId = Math.floor(Math.random() * LEVEL5_TUNING.buttonCount);
+    const realId = Math.floor(Math.random() * CROWD_TUNING.buttonCount);
     return {
       store: GameStore,
-      tune: LEVEL5_TUNING,
+      tune: CROWD_TUNING,
 
-      buttons: scatterSpots(LEVEL5_TUNING).map((spot, id) => ({
+      buttons: scatterSpots(CROWD_TUNING).map((spot, id) => ({
         id,
         isReal: id === realId,
         x: spot.x,
@@ -205,7 +205,7 @@ const LevelFiveScreen = {
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(5);
+    GameStore.startLevel("crowd");
 
     this._timers = [];   // every timeout the level owns
     this._btnRefs = {};  // PushButton instances by id (to un-stick wrongs)
@@ -254,7 +254,7 @@ const LevelFiveScreen = {
         this.schedulePop(btn, this.busyUntil - now + 60);
         return;
       }
-      btn.line = pickLine(LEVEL5_BANTER.invites, btn.line);
+      btn.line = pickLine(CROWD_BANTER.invites, btn.line);
       btn.tick++;
       btn.popped = true;
       // What shows is what counts: plea up for popDuration, then silence.
@@ -275,7 +275,7 @@ const LevelFiveScreen = {
        ready to be pressed again — no penalty, no waiting. */
     onWrongPress(btn) {
       btn.popped = false;
-      btn.feedback = pickLine(LEVEL5_BANTER.rejects, btn.feedback);
+      btn.feedback = pickLine(CROWD_BANTER.rejects, btn.feedback);
       btn.tick++;
       btn.shaking = true;
       // The reply counts as crowd chatter: ambient pop-ups hold
@@ -304,7 +304,7 @@ const LevelFiveScreen = {
         b.popped = false;
         b.feedback = "";
       });
-      btn.feedback = LEVEL5_BANTER.success;
+      btn.feedback = CROWD_BANTER.success;
       btn.tick++;
 
       GameStore.recordPress();

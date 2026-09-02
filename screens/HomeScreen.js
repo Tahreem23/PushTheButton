@@ -39,19 +39,19 @@ const HomeScreen = {
 
         <nav class="home__levels" aria-label="Choose a level">
           <button
-            v-for="level in store.maxLevel"
-            :key="level"
+            v-for="(id, i) in order"
+            :key="id"
             type="button"
             class="home__level"
             :class="{
-              'is-locked': !store.isUnlocked(level),
-              'is-done': store.completedLevels.includes(level),
+              'is-locked': !store.isUnlocked(id),
+              'is-done': store.completedLevels.includes(id),
             }"
-            :disabled="!store.isUnlocked(level)"
-            :aria-label="'Level ' + level"
-            @click="$emit('start', level)"
+            :disabled="!store.isUnlocked(id)"
+            :aria-label="'Level ' + (i + 1)"
+            @click="$emit('start', id)"
           >
-            {{ level }}
+            {{ i + 1 }}
           </button>
         </nav>
       </main>
@@ -59,6 +59,9 @@ const HomeScreen = {
   `,
 
   data() {
-    return { store: GameStore };
+    return {
+      store: GameStore,
+      order: LEVEL_ORDER, // pills follow the registry, not a count
+    };
   },
 };

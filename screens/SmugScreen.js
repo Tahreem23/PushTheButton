@@ -1,5 +1,5 @@
 /* ============================================================
-   LevelThreeScreen — Level 3: the button has opinions.
+   SmugScreen — the "smug" level: the button has opinions.
 
    Same evasion as Level 2 (the EvasiveButton mixin), but the
    button is smaller, faster — and now it TALKS. It anticipates
@@ -16,7 +16,7 @@
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
-const LEVEL3_TUNING = {
+const SMUG_TUNING = {
   buttonScale: 0.6,         // ~30% smaller than Level 2's button
   moveDuration: 200,        // ~30% faster glide than Level 2's 300ms
   escapeDistance: 90,       // px from the button's edge — how early it
@@ -27,7 +27,7 @@ const LEVEL3_TUNING = {
 };
 
 /* The button's whole vocabulary. Short lines only — it's a button. */
-const LEVEL3_BANTER = {
+const SMUG_BANTER = {
   start: "Haha, you can't catch me now!",
   success: "Oh darn it... you got me!",
   taunts: [
@@ -42,8 +42,8 @@ const LEVEL3_BANTER = {
   ],
 };
 
-const LevelThreeScreen = {
-  name: "LevelThreeScreen",
+const SmugScreen = {
+  name: "SmugScreen",
   emits: ["next", "replay", "home"],
 
   mixins: [EvasiveButton],
@@ -109,7 +109,7 @@ const LevelThreeScreen = {
       store: GameStore,
 
       /* ---- banter state ---- */
-      taunt: LEVEL3_BANTER.start,
+      taunt: SMUG_BANTER.start,
       tauntTick: 0,       // bumped per line so the bubble re-pops
       bantering: false,   // post-taunt sulk — escapes stay silent
     };
@@ -117,7 +117,7 @@ const LevelThreeScreen = {
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(3);
+    GameStore.startLevel("smug");
   },
 
   computed: {
@@ -133,7 +133,7 @@ const LevelThreeScreen = {
 
   methods: {
     tuning() {
-      return LEVEL3_TUNING;
+      return SMUG_TUNING;
     },
 
     /* Pointer got close: flee immediately (it saw you coming) and,
@@ -151,7 +151,7 @@ const LevelThreeScreen = {
 
     /* Short, varied, never the same line twice in a row. */
     pickTaunt() {
-      const pool = LEVEL3_BANTER.taunts;
+      const pool = SMUG_BANTER.taunts;
       let next = this.taunt;
       while (next === this.taunt) {
         next = pool[Math.floor(Math.random() * pool.length)];
@@ -161,7 +161,7 @@ const LevelThreeScreen = {
 
     /* Caught. It gets the last word — then the stage bows out. */
     onCaught() {
-      this.taunt = LEVEL3_BANTER.success;
+      this.taunt = SMUG_BANTER.success;
       this.tauntTick++;
       this.bantering = false;
     },

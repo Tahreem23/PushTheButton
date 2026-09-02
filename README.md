@@ -4,15 +4,19 @@ A lightweight browser puzzle game. The objective is ridiculously simple:
 **press the button once.** The game is figuring out *how* — each level
 introduces one new obstacle between you and the press.
 
-| Level | Idea (one sentence) |
-| ----- | ------------------- |
-| 1 | You just… press it. The tutorial. |
-| 2 | The button glides away when your cursor gets close. |
-| 3 | Same chase, but the button is smaller, faster, and taunts you. |
-| 4 | The button teleports: spot it, get there, press before it's gone. |
-| 5 | Five(ish) identical buttons plead for the press; one is real. |
-| 6 | One button, invisible — sweep the cursor and follow the whispers. |
-| 7+ | Stub placeholder — not designed yet. |
+| Level | Id | Idea (one sentence) |
+| ----- | -- | ------------------- |
+| 1 | `simple` | You just… press it. The tutorial. |
+| 2 | `evasive` | The button glides away when your cursor gets close. |
+| 3 | `smug` | Same chase, but the button is smaller, faster, and taunts you. |
+| 4 | `teleport` | The button teleports: spot it, get there, press before it's gone. |
+| 5 | `crowd` | Five(ish) identical buttons plead for the press; one is real. |
+| 6 | `seeker` | One button, invisible — sweep the cursor and follow the whispers. |
+| 7+ | — | Stub placeholder until another id is added to the registry. |
+
+**Level order lives in ONE place: `levels.js` (`LEVEL_ORDER`).** Level
+numbers are derived from position, ids are the identity — reordering is
+literally moving a string.
 
 > **Read `AGENTS.md` first.** It is the source of truth for game rules,
 > UI lock-in, code quality, and the testing checklist. This README is the
@@ -45,17 +49,18 @@ python -m http.server
 
 ```
 index.html                  Entry point. Declares ALL css/js includes, in order.
-app.js                      Vue app shell + screen router (the only Vue instance).
+levels.js                   THE level registry: LEVEL_ORDER + id → screen.
+app.js                      Vue app shell + data-driven router (one Vue instance).
 stores/game.js              GameStore — single source of truth for progress/session.
-shared/evasiveButton.js     EvasiveButton mixin + EVASION_DEFAULTS (Levels 2 & 3).
-screens/
+shared/evasiveButton.js     EvasiveButton mixin + EVASION_DEFAULTS (evasive & smug).
+screens/                    One file per level, named by MECHANIC (id), never number.
   HomeScreen.js             Front door: big button + level-select pills.
-  LevelOneScreen.js         Level 1.
-  LevelTwoScreen.js         Level 2 (thin: mixin + template + identity).
-  LevelThreeScreen.js       Level 3 (mixin + tuning + banter).
-  LevelFourScreen.js        Level 4 — the teleporting button (standalone).
-  LevelFiveScreen.js        Level 5 — the crowd (standalone, no mixin).
-  LevelSixScreen.js         Level 6 — the invisible button (standalone).
+  SimpleScreen.js           "simple" — press it.
+  EvasiveScreen.js          "evasive" (thin: mixin + template + identity).
+  SmugScreen.js             "smug" (mixin + SMUG_TUNING + SMUG_BANTER).
+  TeleportScreen.js         "teleport" — appear/vanish cycle (standalone).
+  CrowdScreen.js            "crowd" — pick the real button (standalone).
+  SeekerScreen.js           "seeker" — the invisible button (standalone).
   LevelStubScreen.js        "Level N is being designed" placeholder (prop: level).
 components/<Name>/          One folder per component: <Name>.js + <Name>.css.
   LevelHeader               "LEVEL n" header + settings button slot.
@@ -72,10 +77,10 @@ css/
   screens/home.css          Home composition (+ level pills).
   screens/level1.css        Level 1 composition + shared success keyframes
                             (stage-nod, stage-leave, bubble-pop — reused elsewhere!).
-  screens/evasive.css       Shared layout for evasive levels (2 & 3).
-  screens/crowd.css         Level 5 — spots, pop/shake layers, intro line.
-  screens/seeker.css        Level 6 — hidden station, reveal pop, hint bubble.
-  screens/teleport.css      Level 4 — appear/vanish cycle, quip bubble.
+  screens/evasive.css       Shared layout for the evasive/smug levels.
+  screens/crowd.css         "crowd" — spots, pop/shake layers, intro line.
+  screens/seeker.css        "seeker" — hidden station, reveal pop, hint bubble.
+  screens/teleport.css      "teleport" — appear/vanish cycle, quip bubble.
   screens/stub.css          Stub screen.
 ```
 
@@ -86,43 +91,53 @@ css/
 ### App shell & routing (`app.js`)
 
 One Vue app owns the whole game. "Routing" is a `screen` string swapped
-under a warm wipe overlay:
+under a warm wipe overlay. The router is **data-driven**: it knows nothing
+about specific levels.
 
 ```
-home → level1 → level2 → level3 → level4 (stub)
+home → level:<id> → level:<next-id> → stub (past the last level)
 ```
 
 Key patterns to know:
 
-- **Fresh-remount keys.** Each level screen gets `:key="'levelN-' + runN"`.
-  `goTo()` bumps `runN` for the destination level, so *entering or
+- **The registry (`levels.js`).** `LEVEL_ORDER` is the progression order;
+  `LEVEL_SCREENS` maps id → component object. `level:<id>` routes resolve
+  through it via a dynamic `<component :is>`. Reordering levels = moving
+  one string; nothing else changes. (`levels.js` loads AFTER the screens,
+  because it references the component objects directly.)
+- **Fresh-remount key.** Level routes render with `:key="screen + '-' + run"`;
+  `goTo()` bumps `run` for any `level:` destination, so *entering or
   replaying a level always mounts a pristine component*. This IS the reset
   mechanism for every level — there are no manual reset methods.
-- `startGame(level?)`: the home button continues at
-  `GameStore.frontierLevel()`; home pill clicks pass an explicit level.
+- `startGame(id?)`: the home button continues at `GameStore.frontierLevel()`;
+  home pill clicks pass an explicit level id.
+- `@next` from a level → the next id in `LEVEL_ORDER` (`goForward()`), or
+  the stub when the current level is last.
 - Transitions: `goTo()` flips the screen 220ms into a 320ms wipe.
 
 ### Game state (`stores/game.js`)
 
 `GameStore` is a `Vue.reactive` object used directly as `store` in screens.
-Groups:
+Groups — note identity is by **id**, never number:
 
-- **Persisted progress**: `unlockedLevel`, `completedLevels`, `load()`,
-  `save()` behind the `PERSIST_PROGRESS` flag (top of file, currently
-  `true` — progress survives reloads; flip to `false` for fresh starts
-  without deleting stored data).
-- **Derived navigation**: `maxLevel` (highest level that EXISTS — bump it
-  when adding a level), `isUnlocked(n)`, `frontierLevel()`.
-- **Session state**: `level`, `attempts`, `levelComplete`, `buttonEnabled`.
-  Every level screen calls `GameStore.startLevel(N)` in `created()` and
-  `GameStore.completeLevel()` on the winning press (handles unlock +
-  save). `recordPress()` counts presses.
+- **Persisted progress**: `completedLevels` (level ids), `load()`, `save()`
+  behind the `PERSIST_PROGRESS` flag (top of file, currently `true` —
+  progress survives reloads; flip to `false` for fresh starts without
+  deleting stored data). Legacy saves stored level NUMBERS: `load()`
+  migrates those to ids by position in the *current* order, once.
+- **Derived navigation**: `unlockedIndex()` (all completed + the next id),
+  `isUnlocked(id)` (completed ids are always replayable), `frontierLevel()`.
+- **Session state**: `levelId`, `level` (display number, derived),
+  `attempts`, `levelComplete`, `buttonEnabled`. Every level screen calls
+  `GameStore.startLevel("<id>")` in `created()` and
+  `GameStore.completeLevel()` on the winning press. `recordPress()` counts
+  presses.
 
 ### Level anatomy
 
 Every implemented level screen follows the same skeleton:
 
-1. `created()` → `GameStore.startLevel(N)`.
+1. `created()` → `GameStore.startLevel("<id>")` (its own thematic id).
 2. Template: `.screen` root → `level-header` → `game-area` → level-specific
    content → success overlay (`level-complete`) → `.screen-flash` div.
 3. Success ceremony: burst → stage nod (`is-hit`) → stage bows out
@@ -158,15 +173,15 @@ Contract: the template must provide `ref="arena"` (absolute canvas),
 
 Extension hooks (override in the screen):
 
-| Hook | Purpose | L2 | L3 |
-| ---- | ------- | -- | -- |
-| `tuning()` | numbers merged over `EVASION_DEFAULTS` | defaults | `LEVEL3_TUNING` |
+| Hook | Purpose | evasive | smug |
+| ---- | ------- | ------- | ---- |
+| `tuning()` | numbers merged over `EVASION_DEFAULTS` | defaults | `SMUG_TUNING` |
 | `onApproach(p)` | "pointer is too close" — default escapes | default (flee) | flee + taunt |
 | `onPressInto()` | press landed, pre-freeze | — | — |
 | `onCaught()` | winning press reaction | hide bubble | success line |
 
-Level 3 adds banter on top: `LEVEL3_TUNING` (all gameplay numbers) +
-`LEVEL3_BANTER` (all dialogue), bubble re-pops per line via
+The "smug" level adds banter on top: `SMUG_TUNING` (all gameplay numbers)
++ `SMUG_BANTER` (all dialogue), bubble re-pops per line via
 `:key="tauntTick"`, cooldown-gated (`interactionCooldown — escapes still
 happen silently during the sulk).
 
@@ -185,15 +200,17 @@ happen silently during the sulk).
 
 ## How to add a new level
 
-1. Create `screens/LevelNScreen.js` (copy the closest existing level;
-   reuse `EvasiveButton` if it's a chase level).
-2. Register the screen + route in `app.js` (with `:key="'levelN-' + runN"`,
-   bump `runN` in `goTo()`), and point the previous level's `@next` at it.
-3. Bump `GameStore.maxLevel` — home pills and frontier navigation follow
-   automatically.
-4. Add its CSS include to `index.html` if needed (plus the script tag,
-   after `shared/evasiveButton.js`, before `app.js`).
-5. Run the AGENTS.md §17 testing checklist.
+1. Create `screens/<Name>Screen.js` (copy the closest existing level;
+   reuse `EvasiveButton` if it's a chase level). Its `created()` calls
+   `GameStore.startLevel("<id>")` with its own thematic id.
+2. In `levels.js`: append the id to `LEVEL_ORDER` and add
+   `id: <Name>Screen` to `LEVEL_SCREENS`.
+3. Add its script tag to `index.html` (screens block, before `levels.js`)
+   plus a stylesheet link if it has one.
+4. Run the AGENTS.md §17 testing checklist.
+
+Router, unlocks, home pills, the header number, and the previous level's
+"Next level →" (which used to hit the stub) all follow automatically.
 
 ---
 
@@ -213,8 +230,12 @@ happen silently during the sulk).
   `clamp(120px, 26vmin, 176px)` expression from `variables.css` to scale
   it — keep them in sync if the master size changes.
 - **Load order in `index.html`:** `stores/game.js` → `shared/` mixins →
-  components → screens → `app.js`. Everything is globals; there are no
-  modules.
+  components → screens → `levels.js` → `app.js`. Everything is globals;
+  there are no modules. `levels.js` MUST load after the screens (it
+  holds component object references).
+- **Save format is id-based.** `completedLevels` holds ids like
+  `"smug"`, so reordering levels never corrupts progress. Numeric saves
+  from before the registry existed are migrated by position on load.
 - **Persistence is ON** (`PERSIST_PROGRESS = true` in `stores/game.js`).
   Progress survives reloads. (It was briefly off by request — check the
   flag if a reload unexpectedly resets to Level 1.)

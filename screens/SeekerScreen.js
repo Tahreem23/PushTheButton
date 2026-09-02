@@ -1,5 +1,5 @@
 /* ============================================================
-   LevelSixScreen — Level 6: find the button.
+   SeekerScreen — the "seeker" level: find the button.
 
    The button IS here. It's fully pressable right now, at a
    freshly-randomized spot. You just can't see it. Sweep the
@@ -15,7 +15,7 @@
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
-const LEVEL6_TUNING = {
+const SEEKER_TUNING = {
   buttonScale: 0.3,    // the hidden button is 40% smaller (token × this)
   warmDistance: 330,   // px from the button's edge: hints begin
   hotDistance: 150,    // px from the button's edge: "Right there…"
@@ -36,7 +36,7 @@ const LEVEL6_TUNING = {
 };
 
 /* Every whisper the button knows. Short only. */
-const LEVEL6_BANTER = {
+const SEEKER_BANTER = {
   found: "Ah, you found me!",
   pressMe: "Press me to go to next level!", // after a beat, the objective
   warm: ["Hmm…", "You're getting warmer…", "Warm…", "Warmer…"],
@@ -51,8 +51,8 @@ function pickSeekerLine(pool, current) {
   return next;
 }
 
-const LevelSixScreen = {
-  name: "LevelSixScreen",
+const SeekerScreen = {
+  name: "SeekerScreen",
   emits: ["next", "replay", "home"],
 
   components: {
@@ -176,14 +176,14 @@ const LevelSixScreen = {
        --button-size token so every part shrinks proportionally. */
     slotStyle() {
       return {
-        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${LEVEL6_TUNING.buttonScale})`,
+        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${SEEKER_TUNING.buttonScale})`,
       };
     },
   },
 
   created() {
     // Entering the level resets its session state (replay included).
-    GameStore.startLevel(6);
+    GameStore.startLevel("seeker");
 
     this._timers = [];
     this._hintT = null;      // hide-hint timer
@@ -237,7 +237,7 @@ const LevelSixScreen = {
     /* The whole hiding spot must fit: margins on every side, extra air
        below the instruction line, and not predictably dead-center. */
     rollHidingSpot() {
-      const t = LEVEL6_TUNING;
+      const t = SEEKER_TUNING;
       const minX = t.edgeMargin;
       const maxX = this._canvas.w - this._station.w - t.edgeMargin;
       const minY = t.topMargin;
@@ -277,12 +277,12 @@ const LevelSixScreen = {
       const { p, d } = this.distanceFromEdge(e.clientX, e.clientY);
 
       // Cursor is on (or practically on) the invisible button → found!
-      if (d <= LEVEL6_TUNING.hitSlop) {
+      if (d <= SEEKER_TUNING.hitSlop) {
         this.reveal();
         return;
       }
 
-      const t = LEVEL6_TUNING;
+      const t = SEEKER_TUNING;
       const zone = d <= t.hotDistance ? "hot" : d <= t.warmDistance ? "warm" : null;
 
       if (!zone) {
@@ -321,7 +321,7 @@ const LevelSixScreen = {
         this._hintLeadT = null;
         if (this.found || this.caught || !this._lastPointer) return;
 
-        const t = LEVEL6_TUNING;
+        const t = SEEKER_TUNING;
         const { p, d } = this.distanceFromEdge(this._lastPointer.x, this._lastPointer.y);
         if (d <= t.hitSlop) {
           this.reveal();
@@ -329,14 +329,14 @@ const LevelSixScreen = {
         }
         const zone = d <= t.hotDistance ? "hot" : d <= t.warmDistance ? "warm" : null;
         if (zone) this.showHint(zone, p); // went cold meanwhile → stay quiet
-      }, LEVEL6_TUNING.hintLeadTime);
+      }, SEEKER_TUNING.hintLeadTime);
     },
 
     /* The radar whisper: pinned near the cursor, then re-clamped once
        the bubble's real size is known, so it can never spill off-stage. */
     showHint(zone, p) {
-      const t = LEVEL6_TUNING;
-      const pool = zone === "hot" ? LEVEL6_BANTER.hot : LEVEL6_BANTER.warm;
+      const t = SEEKER_TUNING;
+      const pool = zone === "hot" ? SEEKER_BANTER.hot : SEEKER_BANTER.warm;
 
       this.hint = pickSeekerLine(pool, this.hint);
       this.hintTick++;
@@ -373,16 +373,16 @@ const LevelSixScreen = {
         this._hintT = null;
       }
 
-      this.reaction = LEVEL6_BANTER.found;
+      this.reaction = SEEKER_BANTER.found;
       this.reactionTick++;
 
       // Finding it isn't the win — after a beat, it asks for the press.
       this.later(() => {
         if (this.found && !this.caught) {
-          this.reaction = LEVEL6_BANTER.pressMe;
+          this.reaction = SEEKER_BANTER.pressMe;
           this.reactionTick++;
         }
-      }, LEVEL6_TUNING.foundBeats);
+      }, SEEKER_TUNING.foundBeats);
     },
 
     /* The press. If the button was still invisible (a blind click),
@@ -415,9 +415,9 @@ const LevelSixScreen = {
           this.flashing = false;
           this.hitTick = false;
         }, 280);
-      }, LEVEL6_TUNING.bowDelay);
+      }, SEEKER_TUNING.bowDelay);
 
-      this.later(() => (this.panelVisible = true), LEVEL6_TUNING.panelDelay);
+      this.later(() => (this.panelVisible = true), SEEKER_TUNING.panelDelay);
     },
   },
 };

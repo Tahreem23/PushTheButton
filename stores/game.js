@@ -4,12 +4,16 @@
    Presentation (screens/components) never mutates gameplay rules
    directly; everything flows through this store.
 
-   Persisted to localStorage:
-     unlockedLevel    — the highest level the player may enter
-     completedLevels  — levels finished at least once
+   Level identity is the ID ("simple", "evasive", …), never the
+   position. Reordering levels.js reshuffles nothing in a save.
+   Legacy saves stored level NUMBERS — load() migrates them by
+   position in the current order, once.
+
+   Persisted to localStorage (behind PERSIST_PROGRESS):
+     completedLevels — level ids finished at least once
 
    Session-only (reset on every level entry):
-     level, attempts, levelComplete, buttonEnabled, gameComplete
+     levelId, level, attempts, levelComplete, buttonEnabled
    ============================================================ */
 
 const SAVE_KEY = "ptb.save.v1";
@@ -17,20 +21,15 @@ const SAVE_KEY = "ptb.save.v1";
 /* Progress persistence switch — currently ON: completed levels and
    unlocks survive a reload via localStorage. Set to false to make
    every reload start fresh at Level 1 without deleting saved data. */
-const PERSIST_PROGRESS = true;
+const PERSIST_PROGRESS = false;
 
 const GameStore = Vue.reactive({
   /* ---- persisted progress ------------------------------------ */
-  unlockedLevel: 1,
-  completedLevels: [],
-
-  /* Highest level that actually exists in this build. Progress may
-     unlock levels beyond this (the stub stands in for them), but
-     navigation should never send the player past it. */
-  maxLevel: 6,
+  completedLevels: [],   // level ids, e.g. ["simple", "evasive"]
 
   /* ---- session state (current level) -------------------------- */
-  level: 1,
+  levelId: null,        // id of the level being played
+  level: 1,             // its display number (position in LEVEL_ORDER)
   attempts: 0,          // presses this attempt
   levelComplete: false,
   gameComplete: false,  // reserved — no "last level" exists yet
@@ -42,9 +41,11 @@ const GameStore = Vue.reactive({
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const save = JSON.parse(raw);
-      if (Array.isArray(save.completedLevels)) this.completedLevels = save.completedLevels;
-      if (typeof save.unlockedLevel === "number") {
-        this.unlockedLevel = Math.max(1, save.unlockedLevel);
+      if (Array.isArray(save.completedLevels)) {
+        this.completedLevels = save.completedLevels
+          // migrate legacy numeric saves by position; keep ids as-is
+          .map((v) => (typeof v === "number" ? LEVEL_ORDER[v - 1] : v))
+          .filter((id) => typeof id === "string" && LEVEL_ORDER.includes(id));
       }
     } catch {
       /* corrupted save → start fresh */
@@ -55,16 +56,36 @@ const GameStore = Vue.reactive({
     if (!PERSIST_PROGRESS) return;
     localStorage.setItem(
       SAVE_KEY,
-      JSON.stringify({
-        unlockedLevel: this.unlockedLevel,
-        completedLevels: this.completedLevels,
-      })
+      JSON.stringify({ completedLevels: this.completedLevels })
     );
   },
 
-  /* Begin (or restart) a level: session state returns to zero. */
-  startLevel(level) {
-    this.level = level;
+  /* Highest playable index: every completed level, plus the next one
+     in LEVEL_ORDER. All-completed → the last level stays playable. */
+  unlockedIndex() {
+    const firstTodo = LEVEL_ORDER.findIndex((id) => !this.completedLevels.includes(id));
+    if (firstTodo === -1) return LEVEL_ORDER.length - 1;
+    return Math.min(firstTodo, LEVEL_ORDER.length - 1);
+  },
+
+  /* Playable = in the registry AND reached by progress (or solved
+     before — a completed level is always replayable). */
+  isUnlocked(id) {
+    const idx = LEVEL_ORDER.indexOf(id);
+    return idx !== -1 && (this.completedLevels.includes(id) || idx <= this.unlockedIndex());
+  },
+
+  /* Where "Press the button" on the home screen takes the player. */
+  frontierLevel() {
+    return LEVEL_ORDER[this.unlockedIndex()];
+  },
+
+  /* Begin (or restart) a level: session state returns to zero.
+     Unknown ids are impossible via the router, but never crash. */
+  startLevel(id) {
+    if (!LEVEL_ORDER.includes(id)) id = LEVEL_ORDER[0];
+    this.levelId = id;
+    this.level = LEVEL_ORDER.indexOf(id) + 1;
     this.attempts = 0;
     this.levelComplete = false;
     this.buttonEnabled = true;
@@ -74,35 +95,24 @@ const GameStore = Vue.reactive({
     if (this.buttonEnabled && !this.levelComplete) this.attempts++;
   },
 
-  /* Playable = exists in this build AND unlocked by progress. */
-  isUnlocked(level) {
-    return level >= 1 && level <= this.maxLevel && level <= this.unlockedLevel;
-  },
-
-  /* Where "Press the button" on the home screen should take the
-     player: the current frontier, never past what exists. */
-  frontierLevel() {
-    return Math.max(1, Math.min(this.unlockedLevel, this.maxLevel));
-  },
-
-  /* Mark the current level solved and unlock the next one. */
+  /* Mark the current level solved; the next in LEVEL_ORDER unlocks. */
   completeLevel() {
     if (this.levelComplete) return;
     this.levelComplete = true;
     this.buttonEnabled = false;
 
-    if (!this.completedLevels.includes(this.level)) {
-      this.completedLevels.push(this.level);
+    if (!this.completedLevels.includes(this.levelId)) {
+      this.completedLevels.push(this.levelId);
     }
-    this.unlockedLevel = Math.max(this.unlockedLevel, this.level + 1);
     this.save();
   },
 
   /* Full progress wipe (future: settings screen hook). */
   resetProgress() {
     localStorage.removeItem(SAVE_KEY);
-    this.unlockedLevel = 1;
     this.completedLevels = [];
+    this.levelId = null;
+    this.level = 1;
     this.gameComplete = false;
   },
 });
