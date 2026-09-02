@@ -22,6 +22,35 @@
   inset: 0;
 }
 
+/* The level's one instruction, pinned to the top of the stage.
+   Never intercepts clicks — the crowd below stays fully touchable. */
+.crowd-intro {
+  position: absolute;
+  left: 50%;
+  top: clamp(14px, 3.5vmin, 26px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.crowd-intro__title {
+  font-size: clamp(1.05rem, 3.2vmin, 1.35rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.crowd-intro__hint {
+  margin-top: 0.2rem;
+  font-size: clamp(0.78rem, 2.2vmin, 0.92rem);
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+}
+
 /* Position layer — the button center sits on its spot. */
 .crowd-btn {
   position: absolute;
@@ -62,6 +91,12 @@
 
 .crowd-pop.is-popped {
   transform: scale(var(--pop-scale, 1.4));
+}
+
+/* The one real button carries a whisper of a shadow the decoys lack.
+   Subtle on purpose — a nudge, not a giveaway. */
+.crowd-pop.is-real {
+  filter: drop-shadow(0 10px 14px rgba(51, 40, 30, 0.30));
 }
 
 /* Shake layer (wrong press): cheeky little "nope" wiggle. */

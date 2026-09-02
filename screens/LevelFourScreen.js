@@ -17,12 +17,12 @@
 
 /* Every tunable for this puzzle lives here — nowhere else. */
 const LEVEL4_TUNING = {
-  buttonCount: 7,
+  buttonCount: 5,
   /* Spots are scattered randomly per mount, in % of the stage, kept
      inside a safe margin (button + bubble must never clip the boundary)
      and never closer than minSpotDistance (also % of the stage). */
   spotMarginX: 14,
-  spotMarginY: 18,
+  spotMarginY: 21,        // keeps top-row bubbles clear of the intro line
   minSpotDistance: 24,
   buttonScale: 0.55,      // crowd buttons are small (token × this)
   popScale: 1.4,          // how big a pop grows the button
@@ -66,9 +66,9 @@ const LEVEL4_BANTER = {
   invites: [
     "Press me!",
     "I'm the real one!",
-    "Pick me!",
+    "Click me!",
     "Push me!",
-    "Trust me!",
+    "I'm the button!",
     "Come on, press me!",
     "I'm definitely the button!",
     "I'm the one you're looking for!",
@@ -114,6 +114,10 @@ const LevelFourScreen = {
 
       <game-area>
         <div class="crowd-canvas">
+          <div class="crowd-intro">
+            <p class="crowd-intro__title">Push the real button</p>
+            <p class="crowd-intro__hint">Don't let the other buttons deceive you</p>
+          </div>
           <div
             v-for="btn in buttons"
             :key="btn.id"
@@ -131,7 +135,7 @@ const LevelFourScreen = {
               />
             </div>
 
-            <div class="crowd-pop" :class="{ 'is-popped': btn.popped }">
+            <div class="crowd-pop" :class="{ 'is-popped': btn.popped, 'is-real': btn.isReal }">
               <div class="crowd-slot" :class="{ 'is-shaking': btn.shaking }">
                 <push-button
                   :ref="(el) => setBtnRef(btn.id, el)"
