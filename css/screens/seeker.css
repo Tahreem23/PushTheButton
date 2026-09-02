@@ -1,0 +1,152 @@
+/* ============================================================
+   Level 5 — Find the Button.
+
+   One invisible, fully-pressable button hidden on the stage.
+   The player sweeps the cursor; whispers appear near the cursor
+   (never near the button). Crossing the hitbox pops the button
+   into view, where it stays.
+
+   Success beats reuse the shared keyframes from level1.css
+   (stage-nod / stage-leave) — every level celebrates the same way.
+   ============================================================ */
+
+/* Absolute coordinate space; the station is positioned in px. */
+.seeker-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* The one instruction, pinned to the top of the stage.
+   Never intercepts clicks. */
+.seeker-intro {
+  position: absolute;
+  left: 50%;
+  top: clamp(14px, 3.5vmin, 26px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.seeker-intro__title {
+  font-size: clamp(1.05rem, 3.2vmin, 1.35rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* The hiding spot: bubble row above, button below.
+   IMPORTANT: hidden with opacity only — visibility:hidden would
+   also disable hit-testing, and the hitbox must stay alive. */
+.seeker-station {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  justify-items: center;
+
+  /* Position arrives as CSS vars from the level's rolled spot,
+     so the reveal keyframes can share it with the base rule. */
+  transform: translate(var(--sx, 0px), var(--sy, 0px));
+  opacity: 0;
+}
+
+/* Found! Pop into view in the game's existing entrance language
+   (same easing/fill as the home button's arrival). */
+.seeker-station.is-found {
+  opacity: 1;
+  animation: seeker-reveal 420ms var(--ease-bounce) both;
+}
+
+@keyframes seeker-reveal {
+  0% {
+    opacity: 0;
+    transform: translate(var(--sx, 0px), var(--sy, 0px)) translateY(0.9vmin) scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(var(--sx, 0px), var(--sy, 0px)) translateY(0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(var(--sx, 0px), var(--sy, 0px)) translateY(0) scale(1);
+  }
+}
+
+/* Bubble row: ABSOLUTELY floated above the slot — it never joins the
+   station's layout, so the button's position can never shift when a
+   (possibly wider) line appears. */
+.seeker-bubble-anchor {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12rem;
+  display: grid;
+  justify-items: center;
+}
+
+/* Seeker dialogue never runs wide: compact type, wraps to two lines
+   instead of growing sideways. */
+.seeker-bubble-anchor .speech-bubble {
+  font-size: clamp(0.78rem, 2vmin, 0.95rem);
+  padding: 0.45em 0.9em;
+  white-space: normal;
+  text-align: center;
+  max-width: 12rem;
+}
+
+/* Button row: anchors the celebration burst to the button. */
+.seeker-slot {
+  position: relative;
+}
+
+.seeker-slot .celebration-burst {
+  inset: 0;
+}
+
+/* The cursor-side whisper WRAPPER: absolute at the pointer's stage
+   point, floated just above it. The bubble inside owns its entrance
+   animation — CSS animations override transform, so positioning and
+   animating must live on separate elements. */
+.seeker-hint {
+  position: absolute;
+  transform: translate(-50%, -110%);
+  pointer-events: none;
+  max-width: 12rem;
+}
+
+.seeker-hint .speech-bubble {
+  font-size: clamp(0.78rem, 2vmin, 0.95rem);
+  padding: 0.45em 0.9em;
+  white-space: normal;
+  text-align: center;
+}
+
+/* ---- Success sequence (shared keyframes live in level1.css) --- */
+
+.seeker-screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+.seeker-screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+.seeker-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+}
+
+/* ---- Accessibility ------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .seeker-station.is-found {
+    animation-duration: 1ms;
+  }
+}

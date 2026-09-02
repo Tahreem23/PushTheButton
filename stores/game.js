@@ -27,7 +27,7 @@ const GameStore = Vue.reactive({
   /* Highest level that actually exists in this build. Progress may
      unlock levels beyond this (the stub stands in for them), but
      navigation should never send the player past it. */
-  maxLevel: 4,
+  maxLevel: 5,
 
   /* ---- session state (current level) -------------------------- */
   level: 1,

@@ -9,7 +9,9 @@ introduces one new obstacle between you and the press.
 | 1 | You just… press it. The tutorial. |
 | 2 | The button glides away when your cursor gets close. |
 | 3 | Same chase, but the button is smaller, faster, and taunts you. |
-| 4+ | Stub placeholder — not designed yet. |
+| 4 | Five(ish) identical buttons plead for the press; one is real. |
+| 5 | One button, invisible — sweep the cursor and follow the whispers. |
+| 6+ | Stub placeholder — not designed yet. |
 
 > **Read `AGENTS.md` first.** It is the source of truth for game rules,
 > UI lock-in, code quality, and the testing checklist. This README is the
@@ -50,6 +52,8 @@ screens/
   LevelOneScreen.js         Level 1.
   LevelTwoScreen.js         Level 2 (thin: mixin + template + identity).
   LevelThreeScreen.js       Level 3 (mixin + tuning + banter).
+  LevelFourScreen.js        Level 4 — the crowd (standalone, no mixin).
+  LevelFiveScreen.js        Level 5 — the invisible button (standalone).
   LevelStubScreen.js        "Level N is being designed" placeholder (prop: level).
 components/<Name>/          One folder per component: <Name>.js + <Name>.css.
   LevelHeader               "LEVEL n" header + settings button slot.
@@ -67,6 +71,8 @@ css/
   screens/level1.css        Level 1 composition + shared success keyframes
                             (stage-nod, stage-leave, bubble-pop — reused elsewhere!).
   screens/evasive.css       Shared layout for evasive levels (2 & 3).
+  screens/crowd.css         Level 4 — spots, pop/shake layers, intro line.
+  screens/seeker.css        Level 5 — hidden station, reveal pop, hint bubble.
   screens/stub.css          Stub screen.
 ```
 
