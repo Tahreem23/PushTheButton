@@ -9,9 +9,9 @@ introduces one new obstacle between you and the press.
 | 1 | You just… press it. The tutorial. |
 | 2 | The button glides away when your cursor gets close. |
 | 3 | Same chase, but the button is smaller, faster, and taunts you. |
-| 4 | Five(ish) identical buttons plead for the press; one is real. |
-| 5 | One button, invisible — sweep the cursor and follow the whispers. |
-| 6 | The button teleports: spot it, get there, press before it's gone. |
+| 4 | The button teleports: spot it, get there, press before it's gone. |
+| 5 | Five(ish) identical buttons plead for the press; one is real. |
+| 6 | One button, invisible — sweep the cursor and follow the whispers. |
 | 7+ | Stub placeholder — not designed yet. |
 
 > **Read `AGENTS.md` first.** It is the source of truth for game rules,
@@ -53,9 +53,9 @@ screens/
   LevelOneScreen.js         Level 1.
   LevelTwoScreen.js         Level 2 (thin: mixin + template + identity).
   LevelThreeScreen.js       Level 3 (mixin + tuning + banter).
-  LevelFourScreen.js        Level 4 — the crowd (standalone, no mixin).
-  LevelFiveScreen.js        Level 5 — the invisible button (standalone).
-  LevelSixScreen.js         Level 6 — the teleporting button (standalone).
+  LevelFourScreen.js        Level 4 — the teleporting button (standalone).
+  LevelFiveScreen.js        Level 5 — the crowd (standalone, no mixin).
+  LevelSixScreen.js         Level 6 — the invisible button (standalone).
   LevelStubScreen.js        "Level N is being designed" placeholder (prop: level).
 components/<Name>/          One folder per component: <Name>.js + <Name>.css.
   LevelHeader               "LEVEL n" header + settings button slot.
@@ -73,9 +73,9 @@ css/
   screens/level1.css        Level 1 composition + shared success keyframes
                             (stage-nod, stage-leave, bubble-pop — reused elsewhere!).
   screens/evasive.css       Shared layout for evasive levels (2 & 3).
-  screens/crowd.css         Level 4 — spots, pop/shake layers, intro line.
-  screens/seeker.css        Level 5 — hidden station, reveal pop, hint bubble.
-  screens/teleport.css      Level 6 — appear/vanish cycle, quip bubble.
+  screens/crowd.css         Level 5 — spots, pop/shake layers, intro line.
+  screens/seeker.css        Level 6 — hidden station, reveal pop, hint bubble.
+  screens/teleport.css      Level 4 — appear/vanish cycle, quip bubble.
   screens/stub.css          Stub screen.
 ```
 

@@ -1,92 +1,53 @@
 /* ============================================================
-   LevelFourScreen — Level 4: which one is me?
+   LevelFourScreen — Level 4: keep your eyes on the button.
 
-   Five small identical buttons, all real-looking, all loudly
-   convinced it is THEM. Exactly one is the real button. There
-   is no clue and there never will be: keep pressing until you
-   find it — the entertainment is the audience participation.
+   One button. It pops into view somewhere random, shouts at you
+   for a moment, and vanishes — then pops up somewhere else.
+   There is exactly one way to win: notice it, get there, press
+   it before the lights go out. Observation + reaction, no luck.
 
-   Every button pops larger on its own staggered timer and pleads
-   its case; a wrong press earns an instant cheeky rejection and
-   costs nothing. One press on the real button wins the level.
+   The cycle, on tracked timers, until caught:
+     appear (fresh random spot + a shout) → visibleFor
+       → vanish (a parting quip) → hiddenFor → appear …
 
-   Data-driven: `buttons` is the only state that matters.
+   The quip bubble lives OUTSIDE the button's station, so the
+   button can vanish while its last word lingers behind.
 
    Emits: next, replay, home.
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
 const LEVEL4_TUNING = {
-  buttonCount: 5,
-  /* Spots are scattered randomly per mount, in % of the stage, kept
-     inside a safe margin (button + bubble must never clip the boundary)
-     and never closer than minSpotDistance (also % of the stage). */
-  spotMarginX: 14,
-  spotMarginY: 21,        // keeps top-row bubbles clear of the intro line
-  minSpotDistance: 24,
-  buttonScale: 0.55,      // crowd buttons are small (token × this)
-  popScale: 1.4,          // how big a pop grows the button
-  popDuration: 1000,      // ms a pop stays up (its plea is visible)
-  minPopInterval: 1500,   // idle bounds between one button's pops
-  maxPopInterval: 3600,
-  staggerStep: 420,       // initial rhythm so the crowd never syncs
-  dialogueGap: 500,       // ms of silence after ANY dialogue — pop-ups
-                          // and replies never overlap, never back-to-back
-  feedbackDuration: 900,  // ms a "wrong one!" line lingers
-  shakeDuration: 320,     // wrong-press wiggle
-  bowDelay: 1000,         // let the success line land, then stage bows out
+  buttonScale: 0.3,       // sneaky and small — same design, token × this
+  visibleFor: 700,       // ms per appearance — notice + get there in time
+  hiddenFor: 450,         // ms of darkness between appearances
+  edgeMargin: 56,         // keep the whole button inside the stage
+  topMargin: 110,         // … and clear of the instruction line
+  minAppearDistance: 150, // px: a reappearance must feel like a NEW spot
+  centerClearance: 0.3,   // never pop up within this fraction of min(W,H)
+                          // of dead center — too obvious, too easy
+  findAttempts: 16,       // placement rerolls before accepting the closest
+  bowDelay: 1000,         // let "Ah, you got me!" land, then stage bows out
   panelDelay: 1600,       // … then the success panel takes over
 };
 
-/* A fresh crowd layout every mount: random spots inside the safe
-   margins, each a comfortable minimum distance from its neighbours. */
-function scatterSpots(t) {
-  const spots = [];
-  let guard = 0;
-  while (spots.length < t.buttonCount && guard++ < 400) {
-    const candidate = {
-      x: t.spotMarginX + Math.random() * (100 - 2 * t.spotMarginX),
-      y: t.spotMarginY + Math.random() * (100 - 2 * t.spotMarginY),
-    };
-    const clear = spots.every(
-      (s) => Math.hypot(s.x - candidate.x, s.y - candidate.y) >= t.minSpotDistance
-    );
-    if (clear) spots.push(candidate);
-  }
-  // Practically unreachable fallback for a tiny stage: a loose fan.
-  while (spots.length < t.buttonCount) {
-    spots.push({ x: 15 + spots.length * 14, y: 50 });
-  }
-  return spots;
-}
-
-/* Every line the crowd knows. Short only — they're buttons. */
+/* Every line it knows. Short only — it's shouting, not lecturing. */
 const LEVEL4_BANTER = {
-  success: "Ah, you got me again!",
-  invites: [
-    "Press me!",
-    "I'm the real one!",
-    "Click me!",
-    "Push me!",
-    "I'm the button!",
+  success: "Ah, you got me!",
+  appears: [
+    "PRESS ME!",
+    "Quick!",
+    "I'm right here!",
     "Come on, press me!",
-    "I'm definitely the button!",
-    "I'm the one you're looking for!",
+    "You see me?",
+    "Hurry!",
+    "Catch me!",
+    "I'm over here!",
   ],
-  rejects: [
-    "Haha! It's not me!",
-    "Nope!",
-    "Wrong one!",
-    "Nice try!",
-    "Not me!",
-    "You wish!",
-    "Keep looking!",
-    "Haha, got you!",
-  ],
+  vanishes: ["Too slow!", "Bye!", "Missed me!"],
 };
 
-/* Pick from a pool, never repeating the same line twice in a row. */
-function pickLine(pool, current) {
+function pickBlinkLine(pool, current) {
   let next = current;
   while (next === current) {
     next = pool[Math.floor(Math.random() * pool.length)];
@@ -109,47 +70,43 @@ const LevelFourScreen = {
   },
 
   template: /* html */ `
-    <div class="screen crowd-screen" :class="{ 'is-hit': hitTick, 'is-leaving': leaving }">
+    <div class="screen teleport-screen" :class="{ 'is-hit': hitTick, 'is-leaving': leaving }">
       <level-header :level="store.level" />
 
       <game-area>
-        <div class="crowd-canvas">
-          <div class="crowd-intro">
-            <p class="crowd-intro__title">Push the real button</p>
-            <p class="crowd-intro__hint">Don't let the other buttons deceive you</p>
+        <div class="teleport-canvas" ref="canvas">
+          <div class="teleport-intro">
+            <p class="teleport-intro__title">Keep your eyes on the button.</p>
           </div>
-          <div
-            v-for="btn in buttons"
-            :key="btn.id"
-            class="crowd-btn"
-            :style="[{ left: btn.x + '%', top: btn.y + '%' }, slotStyle]"
-          >
-            <div class="crowd-bubble-anchor">
-              <!-- Entrance only: the --enter class pops it in; leaving is
-                   instant (no fade-out — the next voice comes right away). -->
-              <speech-bubble
-                v-if="btn.popped || btn.feedback"
-                :key="btn.tick"
-                class="speech-bubble--banter"
-                :text="btn.feedback || btn.line"
-              />
-            </div>
 
-            <div class="crowd-pop" :class="{ 'is-popped': btn.popped, 'is-real': btn.isReal }">
-              <div class="crowd-slot" :class="{ 'is-shaking': btn.shaking }">
-                <push-button
-                  :ref="(el) => setBtnRef(btn.id, el)"
-                  :disabled="!store.buttonEnabled"
-                  @success="onPress(btn)"
-                />
-                <celebration-burst v-if="btn.isReal" :burst="burstCount" />
-              </div>
+          <!-- Its running commentary, positioned independently so the
+               button may vanish mid-sentence. -->
+          <div v-if="quip" :key="quipTick" class="teleport-quip" :style="quipStyle">
+            <speech-bubble class="speech-bubble--banter" :text="quip" />
+          </div>
+
+          <!-- The teleporting button itself. Hidden with opacity only so
+               no layout churn; pointer-events gate clicks to is-visible. -->
+          <div
+            ref="station"
+            class="teleport-station"
+            :class="{ 'is-visible': visible }"
+            :style="stationStyle"
+          >
+            <div ref="slot" class="teleport-slot" :style="slotStyle">
+              <push-button
+                ref="button"
+                :disabled="!store.buttonEnabled"
+                @press="onPressStart"
+                @success="onSuccess"
+              />
+              <celebration-burst :burst="burstCount" />
             </div>
           </div>
         </div>
       </game-area>
 
-      <div v-if="panelVisible" class="crowd-overlay">
+      <div v-if="panelVisible" class="teleport-overlay">
         <level-complete
           :level="store.level"
           @next="$emit('next')"
@@ -163,26 +120,16 @@ const LevelFourScreen = {
   `,
 
   data() {
-    // Scatter the crowd and choose the real button once per mount (a
-    // replay re-does both); the real one never changes mid-attempt.
-    const realId = Math.floor(Math.random() * LEVEL4_TUNING.buttonCount);
     return {
       store: GameStore,
-      tune: LEVEL4_TUNING,
 
-      buttons: scatterSpots(LEVEL4_TUNING).map((spot, id) => ({
-        id,
-        isReal: id === realId,
-        x: spot.x,
-        y: spot.y,
-        popped: false,   // currently grown + pleading
-        line: "",        // its current pop-up plea
-        feedback: "",    // a wrong-press reply (takes precedence over line)
-        shaking: false,  // wrong-press wiggle
-        tick: 0,         // bumped per new line so the bubble re-pops
-      })),
+      /* ---- the cycle ---- */
+      visible: false,          // is the button on stage right now?
+      pos: { x: 0, y: 0 },     // station's top-left, px inside the canvas
+      quip: "",                // current line (empty = bubble hidden)
+      quipTick: 0,             // bumped per line so the bubble re-pops
 
-      /* ---- success ceremony ---- */
+      /* ---- success ceremony (same beats as every level) ---- */
       burstCount: 0,
       flashing: false,
       hitTick: false,
@@ -193,12 +140,27 @@ const LevelFourScreen = {
   },
 
   computed: {
-    /* Small crowd buttons: same approved design, scaled whole via the
-       --button-size token. --pop-scale feeds the CSS pop transition. */
+    /* Position as CSS vars so the appear-pop keyframes can reuse them. */
+    stationStyle() {
+      return {
+        "--sx": this.pos.x + "px",
+        "--sy": this.pos.y + "px",
+      };
+    },
+
+    /* The quip floats just above the button's current spot. */
+    quipStyle() {
+      return {
+        left: this.pos.x + (this._buttonOffset?.x ?? 0) + "px",
+        top: this.pos.y + "px",
+      };
+    },
+
+    /* The smaller button: same approved design, scaled whole via its
+       --button-size token so every part shrinks proportionally. */
     slotStyle() {
       return {
-        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${this.tune.buttonScale})`,
-        "--pop-scale": this.tune.popScale,
+        "--button-size": `calc(clamp(120px, 26vmin, 176px) * ${LEVEL4_TUNING.buttonScale})`,
       };
     },
   },
@@ -207,20 +169,24 @@ const LevelFourScreen = {
     // Entering the level resets its session state (replay included).
     GameStore.startLevel(4);
 
-    this._timers = [];   // every timeout the level owns
-    this._btnRefs = {};  // PushButton instances by id (to un-stick wrongs)
-    this.busyUntil = 0;  // crowd-wide: someone is talking until this time
-                         // (includes fade-out + the dialogueGap silence)
+    this._timers = [];     // every timeout the level owns
+    this._pressing = false; // a press is in flight — the button is pinned
+
+    this._onUp = () => (this._pressing = false);
+    window.addEventListener("pointerup", this._onUp, { passive: true });
+    window.addEventListener("pointercancel", this._onUp, { passive: true });
   },
 
   mounted() {
-    // Staggered first pops so the five never march in sync.
-    this.buttons.forEach((btn, i) =>
-      this.schedulePop(btn, 400 + i * this.tune.staggerStep + Math.random() * 350)
-    );
+    this.$nextTick(() => {
+      this.measure();
+      this.appear();
+    });
   },
 
   unmounted() {
+    window.removeEventListener("pointerup", this._onUp);
+    window.removeEventListener("pointercancel", this._onUp);
     this._timers.forEach(clearTimeout);
   },
 
@@ -232,84 +198,108 @@ const LevelFourScreen = {
       return id;
     },
 
-    setBtnRef(id, el) {
-      this._btnRefs[id] = el;
+    /* One layout read, once: canvas box + button box + button center
+       offset (for positioning the quip above the dome). */
+    measure() {
+      const canvas = this.$refs.canvas.getBoundingClientRect();
+      const slot = this.$refs.slot.getBoundingClientRect();
+
+      this._canvas = { w: canvas.width, h: canvas.height };
+      this._station = { w: slot.width, h: slot.height };
+      this._buttonOffset = { x: slot.width / 2, y: slot.height / 2 };
     },
 
-    /* One button's endless little loop: wait a while, pop up, plead,
-       sink back down, wait again. Frequency is per-button random. */
-    schedulePop(btn, delay) {
-      const t = this.tune;
-      const d =
-        delay ?? t.minPopInterval + Math.random() * (t.maxPopInterval - t.minPopInterval);
-      this.later(() => this.pop(btn), d);
+    /* A fresh spot inside the stage, clear of the instruction, and a
+       real distance from the previous one — never the same place twice
+       in a row, never a two-step shuffle. */
+    rollSpot() {
+      const t = LEVEL4_TUNING;
+      const minX = t.edgeMargin;
+      const maxX = this._canvas.w - this._station.w - t.edgeMargin;
+      const minY = t.topMargin;
+      const maxY = this._canvas.h - this._station.h - t.edgeMargin;
+
+      let best = null;
+      let bestScore = -Infinity;
+      const prev = { x: this.pos.x, y: this.pos.y };
+      const center = { x: this._canvas.w / 2, y: this._canvas.h / 2 };
+      const clearance = t.centerClearance * Math.min(this._canvas.w, this._canvas.h);
+
+      for (let i = 0; i < t.findAttempts; i++) {
+        const cand = {
+          x: minX + Math.random() * (maxX - minX),
+          y: minY + Math.random() * (maxY - minY),
+        };
+        const c = { x: cand.x + this._buttonOffset.x, y: cand.y + this._buttonOffset.y };
+        const fromPrev = Math.hypot(cand.x - prev.x, cand.y - prev.y);
+        const fromCenter = Math.hypot(c.x - center.x, c.y - center.y);
+
+        if (best === null) {
+          best = cand; // first appearance: previous is (0,0), any spot wins
+          bestScore = Math.min(fromPrev, fromCenter);
+          continue;
+        }
+        // A good spot: clearly new AND nowhere near dead center.
+        if (fromPrev >= t.minAppearDistance && fromCenter >= clearance) return cand;
+        const score = Math.min(fromPrev, fromCenter);
+        if (score > bestScore) {
+          bestScore = score;
+          best = cand;
+        }
+      }
+      return best;
     },
 
-    pop(btn) {
+    /* Lights on: new spot, a shout, then the countdown to vanish. */
+    appear() {
       if (this.caught) return;
-      // One voice at a time — and only once the previous bubble has
-      // fully faded out plus a beat of silence. Otherwise, wait.
-      const now = performance.now();
-      if (now < this.busyUntil) {
-        this.schedulePop(btn, this.busyUntil - now + 60);
+
+      this.pos = this.rollSpot();
+      this.quip = pickBlinkLine(LEVEL4_BANTER.appears, this.quip);
+      this.quipTick++;
+      this.visible = true;
+
+      this.later(() => this.vanish(), LEVEL4_TUNING.visibleFor);
+    },
+
+    /* Lights out: the button goes, its parting quip stays a beat,
+       then the whole show starts over somewhere else.
+       Pinned down mid-press? It cannot vanish out from under a finger
+       — check back shortly; the press either lands (caught) or lets go. */
+    vanish() {
+      if (this.caught) return;
+      if (this._pressing) {
+        this.later(() => this.vanish(), 150);
         return;
       }
-      btn.line = pickLine(LEVEL4_BANTER.invites, btn.line);
-      btn.tick++;
-      btn.popped = true;
-      // What shows is what counts: plea up for popDuration, then silence.
-      this.busyUntil = now + this.tune.popDuration + this.tune.dialogueGap;
-      this.later(() => {
-        btn.popped = false;
-        this.schedulePop(btn);
-      }, this.tune.popDuration);
+
+      this.visible = false;
+      this.quip = pickBlinkLine(LEVEL4_BANTER.vanishes, this.quip);
+      this.quipTick++;
+
+      this.later(() => this.appear(), LEVEL4_TUNING.hiddenFor);
     },
 
-    /* A completed press. Exactly one of the five matters. */
-    onPress(btn) {
-      if (this.caught) return;
-      btn.isReal ? this.onCaught(btn) : this.onWrongPress(btn);
+    onPressStart() {
+      this._pressing = true;
     },
 
-    /* Wrong. Cheeky reply, a wiggle, and the button stands back up
-       ready to be pressed again — no penalty, no waiting. */
-    onWrongPress(btn) {
-      btn.popped = false;
-      btn.feedback = pickLine(LEVEL4_BANTER.rejects, btn.feedback);
-      btn.tick++;
-      btn.shaking = true;
-      // The reply counts as crowd chatter: ambient pop-ups hold
-      // until the line is gone (plus the dialogue gap).
-      this.busyUntil = performance.now() + this.tune.feedbackDuration + this.tune.dialogueGap;
-
-      this.later(() => (btn.shaking = false), this.tune.shakeDuration);
-      this.later(() => (btn.feedback = ""), this.tune.feedbackDuration);
-      // PushButton finished its press in the "success" state; stand it
-      // back up (after the pop) or it would refuse further presses.
-      this.later(() => this._btnRefs[btn.id]?.reset(), 480);
-    },
-
-    /* The real one. Stop EVERYTHING, let it say its line, celebrate
-       with the same ceremony every level shares, then the panel. */
-    onCaught(btn) {
-      if (this.caught) return;
+    /* The one press that matters. Kills the cycle dead, delivers the
+       last word, then the shared success ceremony. */
+    onSuccess() {
+      if (this.caught || !this.visible) return;
       this.caught = true;
 
-      // Kill all pop scheduling before the ceremony borrows the timers.
+      // Kill every pending cycle timer before the ceremony takes over.
       this._timers.forEach(clearTimeout);
       this._timers = [];
-
-      // The crowd falls silent; the winner gets the last word.
-      this.buttons.forEach((b) => {
-        b.popped = false;
-        b.feedback = "";
-      });
-      btn.feedback = LEVEL4_BANTER.success;
-      btn.tick++;
+      this.visible = true; // hold it in place for the press to finish
 
       GameStore.recordPress();
       GameStore.completeLevel();
 
+      this.quip = LEVEL4_BANTER.success;
+      this.quipTick++;
       this.burstCount++;
 
       this.later(() => {
@@ -320,9 +310,9 @@ const LevelFourScreen = {
           this.flashing = false;
           this.hitTick = false;
         }, 280);
-      }, this.tune.bowDelay);
+      }, LEVEL4_TUNING.bowDelay);
 
-      this.later(() => (this.panelVisible = true), this.tune.panelDelay);
+      this.later(() => (this.panelVisible = true), LEVEL4_TUNING.panelDelay);
     },
   },
 };
