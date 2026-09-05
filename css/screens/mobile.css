@@ -1,0 +1,59 @@
+/* ============================================================
+   Mobile screens — touch-first layout + The Elusive Button.
+
+   The mobile game lives inside the same #app shell and reuses
+   the existing design tokens, components, and success keyframes.
+   This file only adds:
+     - a mobile viewport lock (no scrolling, fills the screen)
+     - the Elusive Button's instruction line
+     - a couple of touch-comfort tweaks for the roaming button
+
+   The shared evasive layout (.evasive-canvas / .evasive-mover /
+   .evasive-slot / .evasive-overlay / .is-hit / .is-leaving) is
+   reused as-is from css/screens/evasive.css, and the success
+   keyframes (stage-nod / stage-leave) come from level1.css.
+   ============================================================ */
+
+/* ---- Mobile viewport lock --------------------------------------
+   The game fills the screen on touch devices and never scrolls.
+   Applied on the mobile app root so desktop is untouched. */
+.app-root.is-mobile {
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ---- The Elusive Button ---------------------------------------- */
+
+/* A short instruction above the play area — touch-first, so it's
+   a touch larger than the desktop level header label. Sits in the
+   grid row above the game area (the .screen shell is auto/1fr). */
+.elusive__instruction {
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(1rem, 4.5vmin, 1.25rem);
+  letter-spacing: 0.04em;
+  color: var(--color-ink-soft);
+  padding: clamp(6px, 1.5vmin, 12px) 0 0;
+  pointer-events: none; /* never steal taps meant for the button */
+}
+
+/* The roaming button is the only moving thing — give the mover a
+   soft shadow so it reads as a real object gliding across the
+   stage, not a flat sprite. */
+.elusive-screen .evasive-mover {
+  filter: drop-shadow(0 6px 10px rgba(51, 40, 30, 0.18));
+}
+
+/* The stage is the tap target for misses; make sure taps anywhere
+   inside register (the canvas already covers it, but be explicit). */
+.elusive-screen .evasive-canvas {
+  touch-action: manipulation;
+}
+
+/* ---- Accessibility --------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .elusive-screen .evasive-mover.is-gliding {
+    transition-duration: 1ms;
+  }
+}

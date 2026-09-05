@@ -29,6 +29,7 @@
   <link rel="stylesheet" href="css/screens/seeker.css" />
   <link rel="stylesheet" href="css/screens/teleport.css" />
   <link rel="stylesheet" href="css/screens/stub.css" />
+  <link rel="stylesheet" href="css/screens/mobile.css" />
 
   <!-- Components -->
   <link rel="stylesheet" href="components/LevelHeader/LevelHeader.css" />
@@ -67,8 +68,13 @@
   <script src="screens/SeekerScreen.js"></script>
   <script src="screens/LevelStubScreen.js"></script>
 
-  <!-- Level registry: order + id → component (loads AFTER screens) -->
+  <!-- Mobile screens -->
+  <script src="screens/mobile/MobileHomeScreen.js"></script>
+  <script src="screens/mobile/ElusiveButtonScreen.js"></script>
+
+  <!-- Level registries: order + id → component (load AFTER screens) -->
   <script src="levels.js"></script>
+  <script src="levels.mobile.js"></script>
 
   <!-- App shell + router -->
   <script src="app.js"></script>
