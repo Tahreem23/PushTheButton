@@ -62,8 +62,6 @@ const ElusiveButtonScreen = {
     >
       <level-header :level="store.level" />
 
-      <p class="elusive__instruction">Tap the button!</p>
-
       <game-area>
         <div class="evasive-canvas" ref="arena">
           <div

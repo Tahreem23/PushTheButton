@@ -10,9 +10,8 @@ const LevelHeader = {
   },
   template: /* html */ `
     <header class="level-header">
-      <div class="level-header__spacer" aria-hidden="true"></div>
 
-      <h1 class="level-header__label">
+      <h1 class="level-header__label" style="text-align: center;width:100%">
         Level <span class="level-header__number">{{ level }}</span>
       </h1>
 

@@ -27,23 +27,7 @@
 
 /* ---- The Elusive Button ---------------------------------------- */
 
-/* The screen shell is auto/1fr but the instruction adds a third
-   child, so override to auto/auto/1fr so the game area still
-   fills the remaining space. */
-.elusive-screen {
-  grid-template-rows: auto auto 1fr;
-}
-
-/* A short instruction above the play area. */
-.elusive__instruction {
-  text-align: center;
-  font-weight: 800;
-  font-size: clamp(1rem, 4.5vmin, 1.25rem);
-  letter-spacing: 0.04em;
-  color: var(--color-ink-soft);
-  padding: clamp(6px, 1.5vmin, 12px) 0 0;
-  pointer-events: none; /* never steal taps meant for the button */
-}
+/* ---- The Elusive / Smug Button --------------------------------- */
 
 /* The roaming button is the only moving thing — give the mover a
    soft shadow so it reads as a real object gliding across the
