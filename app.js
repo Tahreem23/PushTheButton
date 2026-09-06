@@ -7,7 +7,7 @@
 
    Two flavors of the app share this file:
      desktop — the original mouse-driven game
-     mobile  — a touch-first variant routed at /mobile
+     mobile  — a touch-first variant accessed via #mobile hash
 
    Routing rules (both flavors):
      home              → home screen
@@ -24,12 +24,13 @@
      mobile   → MOBILE_LEVEL_SCREENS (levels.mobile.js)
 
    Mobile detection:
-     On the root route "/", a touch-only device is redirected to
-     "/mobile" (no manual device-selection screen). Detection uses
-     the hover/pointer media queries (the canonical "touch-only"
-     profile) so touch-screen laptops with a mouse stay on desktop.
-     "/mobile" is always directly accessible for testing, and a
-     redirect never fires when already there (no loops).
+     Hash-based — no server rewrites needed. On a page load without
+     #mobile, a touch-only device gets the hash set and mounts the
+     mobile app (no navigation, no reload). #mobile is always
+     directly accessible for testing (yoursite.com/#mobile).
+     Detection uses the hover/pointer media queries (the canonical
+     "touch-only" profile) so touch-screen laptops with a mouse
+     stay on desktop.
    ============================================================ */
 
 /* ---- Device detection ----------------------------------------
@@ -46,19 +47,18 @@ function isTouchOnlyDevice() {
 }
 
 /* ---- Route → which flavor? -----------------------------------
-   "/mobile" always renders the mobile app (directly testable).
-   "/" on a touch-only device redirects to "/mobile" (once —
-   replace() keeps the back button clean). Everything else is
-   the desktop app. */
+   Hash-based: #mobile → mobile app. No hash (or anything else) on
+   a touch-only device → set #mobile and mount the mobile app (no
+   page reload). Directly visiting /#mobile always works for testing.
+   Everything else is the desktop app. */
 function resolveFlavor() {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
-  if (path === "/mobile") return "mobile";
+  if (window.location.hash === "#mobile") return "mobile";
 
-  if (path === "/" && isTouchOnlyDevice()) {
-    // Redirect to the mobile route; replace so the back button
-    // doesn't bounce back to "/" and re-trigger the redirect.
-    window.location.replace("/mobile");
-    return null; // the page navigates away; don't mount anything
+  if (isTouchOnlyDevice()) {
+    // Set the hash so a manual reload stays on mobile, and so the
+    // URL is shareable. replaceState avoids a history entry.
+    history.replaceState(null, "", "#mobile");
+    return "mobile";
   }
 
   return "desktop";
@@ -194,8 +194,8 @@ const mobileApp = Vue.createApp({
       />
 
       <level-stub-screen
-        v-else-if="screen === 'stub'"
-        :level="store.level + 1"
+        v-else-if="screen === 'stub' || isLevelRoute"
+        :level="store.level"
         @home="goTo('home')"
       />
 
@@ -222,7 +222,7 @@ const mobileApp = Vue.createApp({
     },
 
     /* The MOBILE screen registered for this id. Falls back to null
-       → the stub — for levels whose mobile version isn't built yet. */
+       → the stub catches it as a level without a mobile version. */
     levelComponent() {
       return this.currentLevelId
         ? (MOBILE_LEVEL_SCREENS[this.currentLevelId] ?? null)
@@ -275,7 +275,6 @@ const mobileApp = Vue.createApp({
 const flavor = resolveFlavor();
 if (flavor === "mobile") {
   mobileApp.mount("#app");
-} else if (flavor === "desktop") {
+} else {
   desktopApp.mount("#app");
 }
-// flavor === null → a redirect is in flight; mount nothing.

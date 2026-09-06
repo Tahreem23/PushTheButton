@@ -32,6 +32,8 @@ literally moving a string.
   `index.html`, load order matters.
 - **No build step.** Serving the folder statically is the entire build.
 - Deployed on **Vercel** via Git integration: pushing to `main` deploys.
+- **Mobile** is hash-routed (`/#mobile`): touch-only devices get it
+  automatically, no server rewrites needed. Direct link works for testing.
 
 ### Run locally
 

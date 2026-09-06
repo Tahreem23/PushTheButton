@@ -20,7 +20,6 @@ const MobileHomeScreen = {
   components: {
     SettingsButton,
     PushButton,
-    SpeechBubble,
   },
 
   template: /* html */ `
@@ -32,12 +31,8 @@ const MobileHomeScreen = {
       <main class="home__main">
         <h1 class="home__title">PUSH THE BUTTON</h1>
 
-        <div class="speech-anchor">
-          <speech-bubble />
-        </div>
-
         <div class="home__button-slot">
-          <push-button @success="$emit('start')" />
+          <push-button label="START" @success="$emit('start')" />
         </div>
 
         <p class="home__invite">Go on...</p>
