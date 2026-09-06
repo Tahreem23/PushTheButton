@@ -65,7 +65,7 @@ const MobileSeekerScreen = {
       <game-area>
         <div class="seeker-canvas" ref="canvas">
           <div class="seeker-intro">
-            <p class="seeker-intro__title">Find the button.</p>
+            <p class="seeker-intro__title">Tap around to find the button</p>
           </div>
 
           <div
@@ -175,7 +175,9 @@ const MobileSeekerScreen = {
 
   mounted() {
     this._onMove = (e) => this.onPointerMove(e);
+    this._onDown = (e) => this.onPointerMove(e); // taps also count as search
     window.addEventListener("pointermove", this._onMove, { passive: true });
+    window.addEventListener("pointerdown", this._onDown, { passive: true });
 
     this.$nextTick(() => {
       this.measure();
@@ -186,6 +188,7 @@ const MobileSeekerScreen = {
 
   unmounted() {
     window.removeEventListener("pointermove", this._onMove);
+    window.removeEventListener("pointerdown", this._onDown);
     this._timers.forEach(clearTimeout);
   },
 

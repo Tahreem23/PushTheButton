@@ -29,5 +29,6 @@ const MOBILE_LEVEL_SCREENS = {
   smug: SmugButtonScreen,         // Level 3: faster, smaller, smug banter
   teleport: TeleportScreen,       // Level 4: blinks in and out — same on any device
   crowd: MobileCrowdScreen,       // Level 5: five lookalikes, one is real
-  seeker: MobileSeekerScreen,     // Level 6: invisible button, sweep to find
+  seeker: MobileSeekerScreen,       // Level 6: invisible button, sweep to find
+  wipe: MobileWipeScreen,           // Level 7: swipe the fog to find the button
 };

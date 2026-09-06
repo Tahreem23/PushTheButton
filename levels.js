@@ -26,6 +26,7 @@ const LEVEL_ORDER = [
   "teleport", // pops in, shouts, vanishes — catch it in time
   "crowd",    // five lookalikes; one is real
   "seeker",   // invisible; sweep the cursor, follow the whispers
+  "wipe",     // swipe the fog away to find the hidden button
 ];
 
 /* id → the screen component. Kept in sync with screens/. */

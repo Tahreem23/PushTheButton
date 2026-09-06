@@ -336,33 +336,25 @@ const SmugButtonScreen = {
 
     /* ---- Interaction ---- */
 
-    /* Freeze movement while the finger is down so the button can't
-       slide out from under the tap. If the press cancels (finger
-       slides off), resume movement from wherever it stopped. */
+    /* Freeze movement the instant the finger lands.
+       Listen for pointerup/pointercancel on window (not the button
+       element) to detect when the finger lifts — this avoids the
+       false pointerleave that the browser fires when the element's
+       CSS transform moves it out from under the stationary finger. */
     onPressStart() {
       if (this.caught) return;
       this.stopMovement();
-      this._pressing = true;
 
-      // PushButton doesn't emit cancel, so listen on the element
-      // directly for the gesture's end.
-      const el = this.$refs.button?.$refs?.el;
-      if (!el) return;
-
-      const cleanup = () => {
-        el.removeEventListener("pointerup", cleanup);
-        el.removeEventListener("pointercancel", cleanup);
-        el.removeEventListener("pointerleave", cleanup);
-        this._pressing = false;
-        // Delay one tick: if pointerup also triggers onSuccess,
-        // caught will be true by then and we skip the restart.
+      const resume = () => {
+        window.removeEventListener("pointerup", resume);
+        window.removeEventListener("pointercancel", resume);
+        // Give onSuccess a tick to set caught before restarting.
         this.later(() => {
           if (!this.caught) this.startMovement();
         }, 0);
       };
-      el.addEventListener("pointerup", cleanup);
-      el.addEventListener("pointercancel", cleanup);
-      el.addEventListener("pointerleave", cleanup);
+      window.addEventListener("pointerup", resume, { once: true });
+      window.addEventListener("pointercancel", resume, { once: true });
     },
 
     onSuccess() {

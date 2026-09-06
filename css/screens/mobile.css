@@ -41,3 +41,80 @@
 .elusive-screen .evasive-canvas {
   touch-action: manipulation;
 }
+
+/* ---- The Wipe Screen (mobile Level 6) ------------------------- */
+
+/* Absolute coordinate space for the fog + hidden button. */
+.wipe-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* The fog canvas sits on top of everything and intercepts touch. */
+.wipe-fog {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  touch-action: none; /* we handle all pointer events manually */
+  border-radius: inherit; /* match the stage's rounded corners */
+}
+
+/* The hidden button's station. Invisible until found. */
+.wipe-station {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+}
+
+.wipe-station.is-found {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Bubble anchor: floats above the button, never shifts it. */
+.wipe-bubble-anchor {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12rem;
+  display: grid;
+  justify-items: center;
+}
+
+.wipe-bubble-anchor .speech-bubble {
+  font-size: clamp(0.78rem, 2vmin, 0.95rem);
+  padding: 0.45em 0.9em;
+  white-space: normal;
+  text-align: center;
+  max-width: 12rem;
+}
+
+.wipe-slot {
+  position: relative;
+}
+
+.wipe-slot .celebration-burst {
+  inset: 0;
+}
+
+/* Success ceremony — shared keyframes from level1.css. */
+.wipe-screen.is-hit .game-area__stage {
+  animation: stage-nod 220ms ease-out both;
+}
+
+.wipe-screen.is-leaving .game-area__stage {
+  animation: stage-leave 500ms ease-in both;
+}
+
+.wipe-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vmin, 32px);
+  z-index: 3; /* above the fading fog canvas */
+}
