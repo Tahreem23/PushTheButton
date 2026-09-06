@@ -24,5 +24,6 @@
    ============================================================ */
 
 const MOBILE_LEVEL_SCREENS = {
+  simple: SimpleScreen,         // Level 1: just press it — same on any device
   evasive: ElusiveButtonScreen, // Level 2 on mobile: "The Elusive Button"
 };
