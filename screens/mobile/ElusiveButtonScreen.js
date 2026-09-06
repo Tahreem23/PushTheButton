@@ -47,7 +47,7 @@ const ELUSIVE_BANTER = {
   ],
 };
 
-const clampToRange = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+// clampToRange is already declared in shared/evasiveButton.js
 
 const ElusiveButtonScreen = {
   name: "ElusiveButtonScreen",

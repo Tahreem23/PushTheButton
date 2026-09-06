@@ -2,13 +2,10 @@
    MobileHomeScreen — the front door of the mobile game.
 
    A touch-first echo of the desktop home: one button, one
-   whispered invitation. Pressing it starts the frontier mobile
-   level (emits `start`); the mobile router (app.js) animates
-   into the chosen scene.
-
-   No level-select pills: only one mobile level exists so far,
-   so the frontier is always "The Elusive Button". Pills will
-   arrive as more mobile levels are added.
+   whispered invitation, and level pills for replay. Pressing
+   the button starts the frontier mobile level (emits `start`);
+   a pill replays that level (emits `start` with the level id).
+   The mobile router (app.js) animates into the chosen scene.
 
    Emits: start.
    ============================================================ */
@@ -36,7 +33,32 @@ const MobileHomeScreen = {
         </div>
 
         <p class="home__invite">Go on...</p>
+
+        <nav class="home__levels" aria-label="Choose a level">
+          <button
+            v-for="(id, i) in order"
+            :key="id"
+            type="button"
+            class="home__level"
+            :class="{
+              'is-locked': !store.isUnlocked(id),
+              'is-done': store.completedLevels.includes(id),
+            }"
+            :disabled="!store.isUnlocked(id)"
+            :aria-label="'Level ' + (i + 1)"
+            @click="$emit('start', id)"
+          >
+            {{ i + 1 }}
+          </button>
+        </nav>
       </main>
     </div>
   `,
+
+  data() {
+    return {
+      store: GameStore,
+      order: LEVEL_ORDER,
+    };
+  },
 };
