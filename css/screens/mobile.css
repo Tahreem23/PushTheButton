@@ -6,12 +6,15 @@
    This file only adds:
      - a mobile viewport lock (no scrolling, fills the screen)
      - the Elusive Button's instruction line
-     - a couple of touch-comfort tweaks for the roaming button
+     - touch-comfort tweaks for the roaming button
 
    The shared evasive layout (.evasive-canvas / .evasive-mover /
    .evasive-slot / .evasive-overlay / .is-hit / .is-leaving) is
    reused as-is from css/screens/evasive.css, and the success
    keyframes (stage-nod / stage-leave) come from level1.css.
+
+   Movement on mobile is driven by requestAnimationFrame (no CSS
+   transitions on the mover), so there is no .is-gliding class.
    ============================================================ */
 
 /* ---- Mobile viewport lock --------------------------------------
@@ -24,9 +27,14 @@
 
 /* ---- The Elusive Button ---------------------------------------- */
 
-/* A short instruction above the play area — touch-first, so it's
-   a touch larger than the desktop level header label. Sits in the
-   grid row above the game area (the .screen shell is auto/1fr). */
+/* The screen shell is auto/1fr but the instruction adds a third
+   child, so override to auto/auto/1fr so the game area still
+   fills the remaining space. */
+.elusive-screen {
+  grid-template-rows: auto auto 1fr;
+}
+
+/* A short instruction above the play area. */
 .elusive__instruction {
   text-align: center;
   font-weight: 800;
@@ -48,12 +56,4 @@
    inside register (the canvas already covers it, but be explicit). */
 .elusive-screen .evasive-canvas {
   touch-action: manipulation;
-}
-
-/* ---- Accessibility --------------------------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
-  .elusive-screen .evasive-mover.is-gliding {
-    transition-duration: 1ms;
-  }
 }
