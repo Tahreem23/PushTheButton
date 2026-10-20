@@ -23,6 +23,11 @@ const SAVE_KEY = "ptb.save.v1";
    every reload start fresh at Level 1 without deleting saved data. */
 const PERSIST_PROGRESS = false;
 
+/* Level-select switch — currently ON: every level pill is playable
+   from the start, no progress needed. Set to false to lock levels
+   until the one before them is completed. */
+const UNLOCK_ALL_LEVELS = true;
+
 const GameStore = Vue.reactive({
   /* ---- persisted progress ------------------------------------ */
   completedLevels: [],   // level ids, e.g. ["simple", "evasive"]
@@ -69,10 +74,13 @@ const GameStore = Vue.reactive({
   },
 
   /* Playable = in the registry AND reached by progress (or solved
-     before — a completed level is always replayable). */
+     before — a completed level is always replayable), or any
+     registered level while UNLOCK_ALL_LEVELS is on. */
   isUnlocked(id) {
     const idx = LEVEL_ORDER.indexOf(id);
-    return idx !== -1 && (this.completedLevels.includes(id) || idx <= this.unlockedIndex());
+    if (idx === -1) return false;
+    if (UNLOCK_ALL_LEVELS) return true;
+    return this.completedLevels.includes(id) || idx <= this.unlockedIndex();
   },
 
   /* Where "Press the button" on the home screen takes the player. */
