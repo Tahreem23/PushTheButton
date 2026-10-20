@@ -30,5 +30,6 @@ const MOBILE_LEVEL_SCREENS = {
   teleport: TeleportScreen,       // Level 4: blinks in and out — same on any device
   crowd: MobileCrowdScreen,       // Level 5: five lookalikes, one is real
   seeker: MobileSeekerScreen,       // Level 6: invisible button, sweep to find
-  wipe: MobileWipeScreen,           // Level 7: swipe the fog to find the button
+  shy: MobileShyScreen,             // Level 7: placeholder — plain tap until a touch version exists
+  wipe: MobileWipeScreen,           // Level 8: swipe the fog to find the button
 };

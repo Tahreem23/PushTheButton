@@ -26,6 +26,7 @@ const LEVEL_ORDER = [
   "teleport", // pops in, shouts, vanishes — catch it in time
   "crowd",    // five lookalikes; one is real
   "seeker",   // invisible; sweep the cursor, follow the whispers
+  "shy",      // shrinks as you approach — be quick, not careful
   "wipe",     // swipe the fog away to find the hidden button
 ];
 
@@ -37,4 +38,5 @@ const LEVEL_SCREENS = {
   teleport: TeleportScreen,
   crowd: CrowdScreen,
   seeker: SeekerScreen,
+  shy: ShyScreen,
 };

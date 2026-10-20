@@ -90,8 +90,8 @@ const desktopApp = Vue.createApp({
       />
 
       <level-stub-screen
-        v-else-if="screen === 'stub'"
-        :level="store.level + 1"
+        v-else-if="screen === 'stub' || isLevelRoute"
+        :level="stubLevel"
         @home="goTo('home')"
       />
 
@@ -117,10 +117,16 @@ const desktopApp = Vue.createApp({
       return this.isLevelRoute ? this.screen.slice(6) : null;
     },
 
-    /* The screen component registered for this id (null → falls back
-       to nothing renders — unreachable via normal navigation). */
+    /* The screen component registered for this id (null → the id
+       has no desktop screen yet; the stub catches it). */
     levelComponent() {
       return this.currentLevelId ? LEVEL_SCREENS[this.currentLevelId] ?? null : null;
+    },
+
+    /* The number the stub shows: the unbuilt level's own position,
+       or one past the level just finished. */
+    stubLevel() {
+      return this.isLevelRoute ? LEVEL_ORDER.indexOf(this.currentLevelId) + 1 : this.store.level + 1;
     },
   },
 
