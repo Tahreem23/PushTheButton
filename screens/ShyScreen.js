@@ -13,18 +13,43 @@
    A press that lands freezes the size (a shrink mid-click would
    slide the button out from under the cursor and silently cancel).
 
+   On load it settles somewhere out of the cursor's reach, at full
+   size — the player arrives by clicking (Home / Next level), so the
+   cursor's position is already known before the level mounts.
+
    Emits: next, replay, home.
    ============================================================ */
 
 /* Every tunable for this puzzle lives here — nowhere else. */
 const SHY_TUNING = {
   range: 240,         // px from the button's CENTER where shyness begins
-  shrinkMs: 700,      // fastest possible full-size → gone (the lag)
+  shrinkMs: 540,      // fastest possible full-size → gone (the lag)
   growMs: 450,        // gone → full size again once you back off
   nervousBelow: 0.9,  // scale under which it starts protesting
   goneBelow: 0.04,    // scale under which it counts as hidden
   panelDelay: 550,    // standard success-panel timing
+  spawnBuffer: 40,    // extra px past range the spawn keeps from the cursor
+  edgeMargin: 40,     // keep the button (and its wider bubble) on stage
+  topMargin: 90,      // … and room above it for the bubble
 };
+
+/* Last known mouse position, kept across screens. Browsers only
+   report the cursor when it moves, so this is how the level knows
+   where the player is the instant it loads. Two passive listeners
+   for the page's lifetime — no level owns them. */
+const shyLastPointer = { known: false, x: 0, y: 0 };
+["pointermove", "pointerdown"].forEach((type) =>
+  window.addEventListener(
+    type,
+    (e) => {
+      if (e.pointerType === "touch") return;
+      shyLastPointer.known = true;
+      shyLastPointer.x = e.clientX;
+      shyLastPointer.y = e.clientY;
+    },
+    { passive: true, capture: true }
+  )
+);
 
 /* Everything the button says. Short only. */
 const SHY_BANTER = {
@@ -48,35 +73,37 @@ const ShyScreen = {
     LevelComplete,
   },
 
-  /* Reuses Level 1's composition + success sequence (level1.css);
-     shy.css only adds the shrink wrapper and the nervous wobble. */
+  /* Reuses Level 1's success sequence (level1.css); shy.css adds
+     the free-standing station, the shrink wrapper and the wobble. */
   template: /* html */ `
     <div class="screen level1-screen shy-screen" :class="{ 'is-hit': hitTick, 'is-leaving': leaving }">
       <level-header :level="store.level" />
 
       <game-area>
-        <div class="level1">
-          <div class="speech-anchor">
-            <speech-bubble
-              v-if="line"
-              :key="lineTick"
-              class="speech-bubble--banter"
-              :text="line"
-            />
-          </div>
-
-          <div ref="slot" class="level1__button-slot">
-            <div class="shy-shrinker" :style="{ '--shy-scale': scale }">
-              <div class="shy-wobble" :class="{ 'is-nervous': mood === 'nervous' }">
-                <push-button
-                  ref="button"
-                  :disabled="!store.buttonEnabled"
-                  @press="onPressStart"
-                  @success="onSuccess"
-                />
-              </div>
+        <div class="shy-canvas" ref="canvas">
+          <div ref="station" class="shy-station" :style="stationStyle">
+            <div class="shy-bubble-anchor">
+              <speech-bubble
+                v-if="line"
+                :key="lineTick"
+                class="speech-bubble--banter"
+                :text="line"
+              />
             </div>
-            <celebration-burst :burst="burstCount" />
+
+            <div ref="slot" class="level1__button-slot">
+              <div class="shy-shrinker" :class="{ 'is-gone': mood === 'gone' }" :style="{ '--shy-scale': scale }">
+                <div class="shy-wobble" :class="{ 'is-nervous': mood === 'nervous' }">
+                  <push-button
+                    ref="button"
+                    :disabled="!store.buttonEnabled"
+                    @press="onPressStart"
+                    @success="onSuccess"
+                  />
+                </div>
+              </div>
+              <celebration-burst :burst="burstCount" />
+            </div>
           </div>
         </div>
       </game-area>
@@ -98,6 +125,10 @@ const ShyScreen = {
     return {
       store: GameStore,
 
+      /* ---- placement ---- */
+      placed: false,         // measured + positioned — safe to show
+      pos: { x: 0, y: 0 },   // station's top-left inside the stage (px)
+
       /* ---- shyness ---- */
       scale: 1,          // the button's current size (1 = full, 0 = gone)
       mood: "calm",      // calm | nervous | gone — drives the dialogue
@@ -117,6 +148,15 @@ const ShyScreen = {
     };
   },
 
+  computed: {
+    stationStyle() {
+      return {
+        transform: `translate(${this.pos.x}px, ${this.pos.y}px)`,
+        visibility: this.placed ? "visible" : "hidden",
+      };
+    },
+  },
+
   created() {
     // Entering the level resets its session state (replay included).
     GameStore.startLevel("shy");
@@ -124,7 +164,8 @@ const ShyScreen = {
     this._timers = [];
     this._raf = null;
     this._lastT = 0;
-    this._pointer = null;  // freshest mouse position (client coords)
+    // Freshest mouse position (client coords) — usually already known.
+    this._pointer = shyLastPointer.known ? { x: shyLastPointer.x, y: shyLastPointer.y } : null;
     this._center = null;   // button center (client coords), cached
     this._pressing = false; // a press is in progress — size frozen
   },
@@ -139,7 +180,15 @@ const ShyScreen = {
     window.addEventListener("pointercancel", this._onRelease);
     window.addEventListener("resize", this._onResize);
 
-    this.$nextTick(() => this.measure());
+    this.$nextTick(() => {
+      this.measure();
+      this.pos = this.pickSpawn();
+      this.measure();
+      // Full size on arrival, even if the stage was too small to spawn
+      // fully out of range — it reacts once the cursor moves.
+      this.scale = 1;
+      this.placed = true;
+    });
   },
 
   unmounted() {
@@ -159,11 +208,63 @@ const ShyScreen = {
       return id;
     },
 
-    /* One layout read: the slot never scales (only its inner wrapper
-       does), so its box is always the full-size button. */
+    /* Layout reads, cached: stage box, station box, and where the
+       button's center sits inside the station. The slot never scales
+       (only its inner wrapper does), so it's always full size. */
     measure() {
-      const r = this.$refs.slot.getBoundingClientRect();
-      this._center = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      const canvas = this.$refs.canvas.getBoundingClientRect();
+      const station = this.$refs.station.getBoundingClientRect();
+      const slot = this.$refs.slot.getBoundingClientRect();
+
+      this._canvas = { w: canvas.width, h: canvas.height, left: canvas.left, top: canvas.top };
+      this._station = { w: station.width, h: station.height };
+      this._offset = {
+        x: slot.left - station.left + slot.width / 2,
+        y: slot.top - station.top + slot.height / 2,
+      };
+      this.pos = this.clampToStage(this.pos);
+      this._center = {
+        x: canvas.left + this.pos.x + this._offset.x,
+        y: canvas.top + this.pos.y + this._offset.y,
+      };
+    },
+
+    clampToStage(pos) {
+      const t = SHY_TUNING;
+      const maxX = Math.max(t.edgeMargin, this._canvas.w - this._station.w - t.edgeMargin);
+      const maxY = Math.max(t.topMargin, this._canvas.h - this._station.h - t.edgeMargin);
+      return {
+        x: Math.min(maxX, Math.max(t.edgeMargin, pos.x)),
+        y: Math.min(maxY, Math.max(t.topMargin, pos.y)),
+      };
+    },
+
+    /* Somewhere on stage, out of the cursor's reach. Unknown cursor
+       (rare) → stage center; the first move sets its size. */
+    pickSpawn() {
+      const t = SHY_TUNING;
+      const center = this.clampToStage({
+        x: (this._canvas.w - this._station.w) / 2,
+        y: (this._canvas.h - this._station.h) / 2,
+      });
+      if (!this._pointer) return center;
+
+      const p = { x: this._pointer.x - this._canvas.left, y: this._pointer.y - this._canvas.top };
+      const reach = (pos) => Math.hypot(pos.x + this._offset.x - p.x, pos.y + this._offset.y - p.y);
+
+      // Random spots until one is clear of the cursor; if the stage is
+      // too small for that, settle for the farthest one tried.
+      const max = this.clampToStage({ x: Infinity, y: Infinity });
+      let best = center;
+      for (let i = 0; i < 40; i++) {
+        const pos = {
+          x: t.edgeMargin + Math.random() * (max.x - t.edgeMargin),
+          y: t.topMargin + Math.random() * (max.y - t.topMargin),
+        };
+        if (reach(pos) >= t.range + t.spawnBuffer) return pos;
+        if (reach(pos) > reach(best)) best = pos;
+      }
+      return best;
     },
 
     /* The size this distance deserves: full at the edge of range,
@@ -180,7 +281,7 @@ const ShyScreen = {
 
       const first = !this._pointer;
       this._pointer = { x: e.clientX, y: e.clientY };
-      if (this.caught || this._pressing) return;
+      if (!this.placed || this.caught || this._pressing) return;
 
       // First sighting: it was already shy wherever the cursor is —
       // no free window to click it before it has reacted.

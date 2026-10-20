@@ -1,9 +1,9 @@
 /* ============================================================
    "shy" — the button shrinks as the cursor closes in.
 
-   Layout + success sequence are Level 1's (level1.css). This file
-   only adds the shrink wrapper and the nervous wobble — the button
-   itself is untouched; it is scaled whole from the outside.
+   Success sequence is Level 1's (level1.css). This file adds the
+   free-standing station, the shrink wrapper and the nervous wobble —
+   the button itself is untouched; it is scaled whole from outside.
    ============================================================ */
 
 /* Size arrives as --shy-scale from the level's easing loop.
@@ -12,6 +12,11 @@
   transform: scale(var(--shy-scale, 1));
   transform-origin: center;
   will-change: transform;
+}
+
+/* Hidden means hidden: a speck can't be clicked. */
+.shy-shrinker.is-gone {
+  pointer-events: none;
 }
 
 /* Trembles while it's shrinking away from you. Lives on its own
@@ -30,4 +35,32 @@
   .shy-wobble.is-nervous {
     animation: none;
   }
+}
+
+/* ---- Free-standing station (spawns away from the cursor) ------ */
+
+/* Absolute coordinate space; the station is positioned in px. */
+.shy-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Bubble row above, button below; position arrives as a transform. */
+.shy-station {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  justify-items: center;
+}
+
+/* Bubble floats above the button, out of layout, so a longer line
+   never shifts the button. */
+.shy-bubble-anchor {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
 }
