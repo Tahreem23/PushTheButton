@@ -23,7 +23,7 @@
 /* Every tunable for this puzzle lives here — nowhere else. */
 const SHY_TUNING = {
   range: 240,         // px from the button's CENTER where shyness begins
-  shrinkMs: 450,      // fastest possible full-size → gone (the lag)
+  shrinkMs: 375,      // fastest possible full-size → gone (the lag)
   growMs: 450,        // gone → full size again once you back off
   nervousBelow: 0.9,  // scale under which it starts protesting
   goneBelow: 0.04,    // scale under which it counts as hidden
