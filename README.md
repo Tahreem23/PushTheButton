@@ -12,7 +12,9 @@ introduces one new obstacle between you and the press.
 | 4 | `teleport` | The button teleports: spot it, get there, press before it's gone. |
 | 5 | `crowd` | Five(ish) identical buttons plead for the press; one is real. |
 | 6 | `seeker` | One button, invisible — sweep the cursor and follow the whispers. |
-| 7+ | — | Stub placeholder until another id is added to the registry. |
+| 7 | `shy` | The button shrinks as you approach — slowly, so only a quick, decisive move catches it. (Mobile: plain-tap placeholder.) |
+| 8 | `wipe` | Mobile only: swipe the fog away to find the button. Desktop shows the stub. |
+| 9+ | — | Stub placeholder until another id is added to the registry. |
 
 **Level order lives in ONE place: `levels.js` (`LEVEL_ORDER`).** Level
 numbers are derived from position, ids are the identity — reordering is
@@ -63,6 +65,7 @@ screens/                    One file per level, named by MECHANIC (id), never nu
   TeleportScreen.js         "teleport" — appear/vanish cycle (standalone).
   CrowdScreen.js            "crowd" — pick the real button (standalone).
   SeekerScreen.js           "seeker" — the invisible button (standalone).
+  ShyScreen.js              "shy" — shrinks as you approach (SHY_TUNING).
   LevelStubScreen.js        "Level N is being designed" placeholder (prop: level).
 components/<Name>/          One folder per component: <Name>.js + <Name>.css.
   LevelHeader               "LEVEL n" header + settings button slot.
@@ -83,6 +86,7 @@ css/
   screens/crowd.css         "crowd" — spots, pop/shake layers, intro line.
   screens/seeker.css        "seeker" — hidden station, reveal pop, hint bubble.
   screens/teleport.css      "teleport" — appear/vanish cycle, quip bubble.
+  screens/shy.css           "shy" — shrink wrapper + nervous wobble (layout from level1.css).
   screens/stub.css          Stub screen.
 ```
 
